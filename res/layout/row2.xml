@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="64dip"
+    android:gravity="center_vertical"
+    android:id="@+id/list_row"
+    android:ignoreGravity="@id/drag_handle" >
+
+    <ImageView
+        android:id="@id/drag_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/grabber" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_toRightOf="@id/drag_handle" >
+
+        <LinearLayout
+            android:id="@+id/topPart"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/drag_handle" 
+            android:weightSum="1.0"
+            android:paddingRight="5dp" >
+
+            <TextView
+                android:id="@+id/label"
+                android:layout_width="0dp" 
+                android:layout_height="wrap_content"
+                android:layout_weight=".60"
+                android:ellipsize="end"
+                android:paddingLeft="3dip"
+                android:singleLine="true"
+                android:text="New York long name her"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <com.threebars.worldclock2.CustomDigitalClock
+                android:id="@+id/clock"
+                android:layout_width="0dp" 
+                android:layout_height="wrap_content"
+                android:layout_weight=".40"
+                android:gravity="right"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
+        <TextView
+            android:id="@+id/country" 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/topPart"
+            android:text="USA"/>
+         <TextView
+            android:id="@+id/gmt" 
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:paddingRight="5dp"
+            android:layout_below="@id/topPart"
+            android:layout_toRightOf="@id/country"
+            android:text="+ 4 gmt"/>
+    </RelativeLayout>
+
+</RelativeLayout>
