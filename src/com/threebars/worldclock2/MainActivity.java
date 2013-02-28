@@ -62,7 +62,7 @@ public class MainActivity extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		db = new CitiesDatabase(getApplicationContext());
 		
 		@SuppressWarnings("unchecked")
 		List<CityTimeZone> cities = (List<CityTimeZone>) getLastNonConfigurationInstance();
@@ -74,7 +74,8 @@ public class MainActivity extends ListActivity {
 
 			cities = new ArrayList<CityTimeZone>();
 
-			db = new CitiesDatabase(getApplicationContext());
+			
+			
 			if (listOrder == null) {
 				cities = db.getDefaultCities();
 				Log.d(TAG, " # of default cities : " + cities.size());

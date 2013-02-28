@@ -16,34 +16,33 @@
 
 package com.threebars.worldclock2;
 
+import static com.threebars.worldclock2.CitiesDatabase.COLUMN_NAMES.COL_KEY_COUNTRY;
 import static com.threebars.worldclock2.CitiesDatabase.COLUMN_NAMES.COL_LATITUDE;
 import static com.threebars.worldclock2.CitiesDatabase.COLUMN_NAMES.COL_LONGITUDE;
 import static com.threebars.worldclock2.CitiesDatabase.COLUMN_NAMES.COL_TIMEZONE;
 import static com.threebars.worldclock2.CitiesDatabase.COLUMN_NAMES.COL_TIMEZONE_NAME;
 
-import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.os.AsyncTask;
 import android.provider.BaseColumns;
 import android.util.Log;
 
@@ -56,6 +55,11 @@ public class CitiesDatabase {
     private static final String TAG = "DictionaryDatabase";
 
     public static final String TABLE_CITIES_FTS = "cities_fts";
+    public static final String TABLE_CITIES = "cities";
+    
+	private static String DB_PATH = "/data/data/com.threebars.worldclock2/databases/";
+    public static String DB_NAME = "cities";
+
     
     public static enum COLUMN_NAMES {
 
@@ -91,7 +95,7 @@ public class CitiesDatabase {
 	};
 	
 	private static final String DATABASE_NAME = "cities";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
 
 	
 	
@@ -111,6 +115,7 @@ public class CitiesDatabase {
      */
     public CitiesDatabase(Context context) {
     	mDatabaseOpenHelper = new DatabaseOpenHelper(context);
+    	mDatabaseOpenHelper.createDatabase();
     	this.context = context;
     }
 
@@ -120,9 +125,7 @@ public class CitiesDatabase {
     	}
     }
     
-    public void populateDb() {
-    	new LoadCitiesTask().execute();
-    }
+   
     /**
      * Builds a map for all columns that may be requested, which will be given to the 
      * SQLiteQueryBuilder. This is a good way to define aliases for column names, but must include 
@@ -304,7 +307,6 @@ public class CitiesDatabase {
         return cursor;
     }
     
-    private static ProgressDialog progressBar;
     
     /**
      * This creates/opens the database.
@@ -313,6 +315,7 @@ public class CitiesDatabase {
 
         private final Context mHelperContext;
         private SQLiteDatabase mDatabase;
+		private SQLiteDatabase myDatabase;
 
         /* Note that FTS3 does not support column constraints and thus, you cannot
          * declare a primary key. However, "rowid" is automatically used as a unique
@@ -333,85 +336,97 @@ public class CitiesDatabase {
         @Override
         public void onCreate(SQLiteDatabase db) {
             mDatabase = db;
-            mDatabase.execSQL(FTS_TABLE_CREATE);
-            
-            	Log.d(TAG, "LOADING CITIES FROM FILE ");
-            	try {
-					loadWords();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+//            mDatabase.execSQL(FTS_TABLE_CREATE);
             	
         }
         
-        /**
-         * Starts a thread to load the database table with words
-         */
-        private void loadDictionary() {
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        loadWords();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }).start();
-        }
+        
+        public synchronized void createDatabase() {
+    		boolean dbExists = checkDbExists();
+    		Log.d(TAG, "DATABASE EXISTS : " + dbExists);
+    		if(!dbExists) {
+    			
+    			//by calling this method we create an empty database into the default system location
+    			//we need this so we can overwrite that database with our database
+    			this.getReadableDatabase().close();
+    			//now we copy the database that we included
+    			copyDBFromResource();
+    			
+    			//populate fts table
+    			copyDbFromSqlite();
+    			
+    		}
+    	}
 
-        private void loadWords() throws IOException {
-            Log.d(TAG, "Loading words...");
-            final Resources resources = mHelperContext.getResources();
-            InputStream inputStream = resources.openRawResource(R.raw.cities);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    	
+    	private boolean checkDbExists() {
+    		SQLiteDatabase db = null;
+    		try {
+    			String databasePath = DB_PATH + DB_NAME;
+    			db = SQLiteDatabase.openDatabase(databasePath, null, SQLiteDatabase.OPEN_READONLY);
+//    			db.setLocale(Locale.getDefault());
+//    			db.setLockingEnabled(true);
+//    			db.setVersion(1);
+    		} catch (SQLiteException e) {
+    			Log.e("SqlHelper", "database not found");
+    		}
+    		Log.d(TAG, "db is null : " + (db == null));
+    		if (db != null) {
+    			db.close();
+    		}
 
-            mDatabase.beginTransaction();
-            try {
-                String line = null;
-    			while ((line = reader.readLine()) != null) {
-
-    				CityTimeZone cityTimeZone = new CityTimeZone();
-    				
-    				String otherThanQuote = " [^\"] ";
-    		        String quotedString = String.format(" \" %s* \" ", otherThanQuote);
-    		        String regex = String.format("(?x) "+ // enable comments, ignore white spaces
-    		                ",                         "+ // match a comma
-    		                "(?=                       "+ // start positive look ahead
-    		                "  (                       "+ //   start group 1
-    		                "    %s*                   "+ //     match 'otherThanQuote' zero or more times
-    		                "    %s                    "+ //     match 'quotedString'
-    		                "  )*                      "+ //   end group 1 and repeat it zero or more times
-    		                "  %s*                     "+ //   match 'otherThanQuote'
-    		                "  $                       "+ // match the end of the string
-    		                ")                         ", // stop positive look ahead
-    		                otherThanQuote, quotedString, otherThanQuote);
-
-    		        String[] tokens = line.split(regex);
-
-    				
-    				cityTimeZone.city = tokens[0].replaceAll("\"", "");
-    				cityTimeZone.country = tokens[2].replaceAll("\"", "");
-    				int startBracketIndex = tokens[1].indexOf("(") + 1;
-    				int closeBracketIndex = tokens[1].indexOf(")");
-    				cityTimeZone.timezone = tokens[1].substring(startBracketIndex, closeBracketIndex).replaceAll("\"", "");
-    				cityTimeZone.latitude = Double.parseDouble(tokens[3]);
-    				cityTimeZone.longitude = Double.parseDouble(tokens[4]);
-    				cityTimeZone.timezoneName = tokens[5].replaceAll("\"", "");
-    				
-    				long id = addCityTimeZone(cityTimeZone);
-//    					cityTimeZoneList .add(cityTimeZone);
-//    				System.out.println(cityTimeZone.toString());
-
+    		return (db != null) ? true : false;
+    	}
+    	
+    	private void copyDbFromSqlite() {
+    		SQLiteDatabase db = getWritableDatabase();
+    		db.execSQL(FTS_TABLE_CREATE);
+//    		db.execSQL("INSERT INTO " + TABLE_CITIES_FTS + " SELECT * FROM " + TABLE_CITIES); // + " WHERE NOT EXISTS " + TABLE_CITIES_FTS  );
+    		db.execSQL("INSERT INTO " + TABLE_CITIES_FTS + " (" + KEY_CITY + "," + KEY_COUNTRY + ", " 
+    	            + COL_TIMEZONE + ", "
+    	            + COL_TIMEZONE_NAME + ", "
+    	            + COL_LATITUDE + ", "
+    	            + COL_LONGITUDE + ")" + " SELECT " + "city, country, " + COL_TIMEZONE +", " + COL_TIMEZONE_NAME + ", " + COL_LATITUDE + ", " + COL_LONGITUDE  + " FROM " + TABLE_CITIES );
+    		db.close();
+    	}
+    	
+    	private void copyDBFromResource() {
+    		InputStream inputStream = null;
+    		OutputStream outStream = null;
+    		String dbFilePath = DB_PATH + DB_NAME;
+    		
+    		try {
+    			inputStream = mHelperContext.getAssets().open("cities.db");	//get the db file from assets folder
+    			
+    			outStream = new FileOutputStream(dbFilePath);
+    			
+    			byte[] buffer = new byte[1024];
+    			int length = 0;
+    			while (( length = inputStream.read(buffer)) > 0 ) {
+    				Log.d(TAG, "writing to new db length : " + length);
+    				outStream.write(buffer, 0, length);
     			}
-    			mDatabase.setTransactionSuccessful();
-            } finally {
-                reader.close();
-                mDatabase.endTransaction();
-            }
-            Log.d(TAG, "DONE loading words.");
-            
-            
-        }
+    			
+    			outStream.flush();
+    			outStream.close();
+    			inputStream.close();
+    		}
+    		catch (IOException e) {
+    			throw new Error("Problem copying the database from resource file");
+    		}
+    		
+    	}
+    	
+    	@Override
+    	public synchronized void close() {
+    		if (myDatabase != null)
+    			myDatabase.close();
+    		super.close();
+    	}
+
+ 
+
+       
 
         /**
          * Add a word to the dictionary.
@@ -431,141 +446,11 @@ public class CitiesDatabase {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        	Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-                    + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_CITIES_FTS);
-            onCreate(db);
+//        	Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
+//                    + newVersion + ", which will destroy all old data");
+//            db.execSQL("DROP TABLE IF EXISTS " + TABLE_CITIES_FTS);
+//            onCreate(db);
         }
     }
     
-    public class LoadCitiesTask extends AsyncTask<Void, Integer,Void> {
-        
-    	private int maxLineNumber = 100;
-		
-    	@Override
-    	protected void onPreExecute() {
-    		super.onPreExecute();
-    		try {
-	    		final Resources resources = context.getResources();
-				InputStream inputStream = resources.openRawResource(R.raw.cities);
-				
-				BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-				
-	    		LineNumberReader  lnr = new LineNumberReader(reader);
-				lnr.skip(Long.MAX_VALUE);
-				maxLineNumber = lnr.getLineNumber();
-	
-				progressBar = new ProgressDialog(context);
-	        	progressBar.setMessage("Loading Cities for first time...");
-	        	progressBar.setCancelable(false);
-	        	progressBar.setIndeterminate(false);
-	        	progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-				
-				progressBar.setMax(maxLineNumber);
-	    		progressBar.show();
-    		
-				reader.close();
-				inputStream.close();
-			} catch (IOException e) {
-			}
-    	}
-		@Override
-		protected Void doInBackground(Void... params) {
-			Log.d(TAG, "Loading cities...");
-			final Resources resources = context.getResources();
-			InputStream inputStream = resources.openRawResource(R.raw.cities);
-			
-			
-			
-			SQLiteDatabase mDatabase = mDatabaseOpenHelper.getWritableDatabase();
-
-			long start = System.currentTimeMillis();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-			
-			try {
-				
-				mDatabase.beginTransaction();
-
-	            String line = null;
-	            int count = 0;
-				try {
-					while ((line = reader.readLine()) != null) {
-						
-						CityTimeZone cityTimeZone = new CityTimeZone();
-						
-						String otherThanQuote = " [^\"] ";
-					    String quotedString = String.format(" \" %s* \" ", otherThanQuote);
-					    String regex = String.format("(?x) "+ // enable comments, ignore white spaces
-					            ",                         "+ // match a comma
-					            "(?=                       "+ // start positive look ahead
-					            "  (                       "+ //   start group 1
-					            "    %s*                   "+ //     match 'otherThanQuote' zero or more times
-					            "    %s                    "+ //     match 'quotedString'
-					            "  )*                      "+ //   end group 1 and repeat it zero or more times
-					            "  %s*                     "+ //   match 'otherThanQuote'
-					            "  $                       "+ // match the end of the string
-					            ")                         ", // stop positive look ahead
-					            otherThanQuote, quotedString, otherThanQuote);
-
-						String[] tokens = line.split(regex);
-	
-						cityTimeZone.city = tokens[0];
-						cityTimeZone.country = tokens[2];
-						cityTimeZone.timezone = tokens[1].substring(2, 11);
-						cityTimeZone.latitude = Double.parseDouble(tokens[3]);
-						cityTimeZone.longitude = Double.parseDouble(tokens[4]);
-						cityTimeZone.timezoneName = tokens[5];
-						// cityTimeZone.preferredName = "";
-	
-						long id = mDatabaseOpenHelper.addCityTimeZone(cityTimeZone);
-						if (id < 0) {
-							Log.e(TAG, "unable to add city: " + cityTimeZone);
-						}
-						count++;
-						publishProgress((int) ((count / (float) maxLineNumber) * 100));
-					}
-				} catch (NumberFormatException e) {
-					Log.d(TAG, "error adding " + e.getMessage());
-					e.printStackTrace();
-				} catch (IOException e) {
-					Log.d(TAG, "error adding2 " + e.getMessage());
-					e.printStackTrace();
-				}
-
-				mDatabase.setTransactionSuccessful();
-			} finally {
-				try {
-					reader.close();
-				} catch (IOException e) {
-				}
-				mDatabase.endTransaction();
-				mDatabase.close();
-			}
-			
-			
-			long end = System.currentTimeMillis();
-
-			Log.d(TAG, "TIME IT TOOK : " + (end - start) / 1000d + " seconds...");
-			Log.d(TAG, "DONE loading words.");
-			return null;
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... progress) {
-			super.onProgressUpdate(progress);
-			progressBar.setProgress(progress[0]);
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			progressBar.dismiss();
-			
-			SharedPreferences prefs = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-			SharedPreferences.Editor ed = prefs.edit();
-        	ed.putBoolean("hasLoadedCities", true);
-        	ed.commit();  //Commiting changes
-		}
-	     
-    	
-    }
 }

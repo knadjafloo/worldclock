@@ -42,7 +42,7 @@ public class CitiesProvider extends ContentProvider {
     public static final String DEFINITION_MIME_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE +
                                                        "/vnd.example.android.searchabledict";
 
-    private CitiesDatabase mDictionary;
+    private CitiesDatabase mCitiesDatabase;
 
     // UriMatcher stuff
     private static final int SEARCH_WORDS = 0;
@@ -76,7 +76,7 @@ public class CitiesProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        mDictionary = new CitiesDatabase(getContext());
+        mCitiesDatabase = new CitiesDatabase(getContext());
         return true;
     }
 
@@ -124,7 +124,7 @@ public class CitiesProvider extends ContentProvider {
                         (only if you want to refresh shortcuts) */
           SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
 
-      return mDictionary.getCityMatches(query, columns);
+      return mCitiesDatabase.getCityMatches(query, columns);
     }
 
     private Cursor search(String query) {
@@ -134,7 +134,7 @@ public class CitiesProvider extends ContentProvider {
           CitiesDatabase.KEY_CITY,
           CitiesDatabase.KEY_COUNTRY};
 
-      return mDictionary.getCityMatches(query, columns);
+      return mCitiesDatabase.getCityMatches(query, columns);
     }
 
     private Cursor getCity(Uri uri) {
@@ -143,7 +143,7 @@ public class CitiesProvider extends ContentProvider {
     		  CitiesDatabase.KEY_CITY,
               CitiesDatabase.KEY_COUNTRY};
 
-      return mDictionary.getCity(rowId, columns);
+      return mCitiesDatabase.getCity(rowId, columns);
     }
 
     private Cursor refreshShortcut(Uri uri) {
@@ -162,7 +162,7 @@ public class CitiesProvider extends ContentProvider {
           SearchManager.SUGGEST_COLUMN_SHORTCUT_ID,
           SearchManager.SUGGEST_COLUMN_INTENT_DATA_ID};
 
-      return mDictionary.getCity(rowId, columns);
+      return mCitiesDatabase.getCity(rowId, columns);
     }
 
     /**
