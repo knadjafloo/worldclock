@@ -195,6 +195,34 @@ public class CitiesDatabase {
 		return cities;
     }
     
+    public List<CityTimeZone> getAllCities() 
+    {
+    	List<CityTimeZone> cities = new ArrayList<CityTimeZone>();
+    	SQLiteDatabase db = mDatabaseOpenHelper.getReadableDatabase();
+		Cursor cursor = db.query(TABLE_CITIES_FTS,	//db name 
+		new String[] {"rowid",KEY_CITY, KEY_COUNTRY, COL_TIMEZONE.getName(), COL_TIMEZONE_NAME.getName(), COL_LATITUDE.getName(), COL_LONGITUDE.getName()},	//columns
+		null,	//selection,
+		null,		 //selectionArgs, 
+		null,//groupBy, 
+		null,//having, 
+		null);//orderBy)
+		
+		cursor.moveToFirst();
+		
+		while (!cursor.isAfterLast()) {
+			CityTimeZone comment = cursorToCityTimeZone(cursor);
+			cities.add(comment);
+			cursor.moveToNext();
+		}
+		// Make sure to close the cursor
+		cursor.close();
+		
+		final Map<String, Integer> orderMap = new HashMap<String, Integer>();
+		
+		Log.d("DAO", "# of cities : " + cities.size());
+		return cities;
+    }
+    
     public List<CityTimeZone> getCitiesById(String ids) {
     	List<CityTimeZone> cities = new ArrayList<CityTimeZone>();
     	SQLiteDatabase db = mDatabaseOpenHelper.getReadableDatabase();

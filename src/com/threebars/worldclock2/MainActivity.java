@@ -64,6 +64,28 @@ public class MainActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		db = new CitiesDatabase(getApplicationContext());
 		
+		initializeUi();
+		
+		handleIntent(getIntent());
+	}
+	
+	@SuppressLint("NewApi")
+	@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            searchView.setIconifiedByDefault(true);
+        }
+
+        return true;
+    }
+	
+	private void initializeUi() {
 		@SuppressWarnings("unchecked")
 		List<CityTimeZone> cities = (List<CityTimeZone>) getLastNonConfigurationInstance();
 		if (cities != null) {
@@ -87,11 +109,9 @@ public class MainActivity extends ListActivity {
 
 			db.close();
 
-			setContentView(R.layout.activity_main);
 
 		}
-Log.d(TAG, " list view class is : " + getListView().getClass().getName());
-Log.d(TAG, " list2 view class is : " + findViewById(android.R.id.list).getClass().getName());
+		setContentView(R.layout.activity_main);
 		DragSortListView mDslv = (DragSortListView) getListView();
 //		mDslv.setTextFilterEnabled(true);
 		mDslv.setDropListener(onDrop);
@@ -105,37 +125,19 @@ Log.d(TAG, " list2 view class is : " + findViewById(android.R.id.list).getClass(
 
 		adapter = new IconicAdapter(cities, this);
 		setListAdapter(adapter);
-		
-		handleIntent(getIntent());
 	}
-	
-	@SuppressLint("NewApi")
-	@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-            searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-            searchView.setIconifiedByDefault(true);
-        }
-
-        return true;
-    }
-
-	@Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
-            setContentView(R.layout.activity_main);
-        }
-        else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            setContentView(R.layout.activity_main);         
-        }
-    }
-	
+//	@Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+//        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
+//            setContentView(R.layout.activity_main);
+//        }
+//        else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+//            setContentView(R.layout.activity_main);         
+//        }
+//    }
+//	
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -152,6 +154,13 @@ Log.d(TAG, " list2 view class is : " + findViewById(android.R.id.list).getClass(
         }
         return false;
     }
+    
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+      super.onConfigurationChanged(newConfig);
+      initializeUi();
+    }
+
 
     @Override
     protected void onRestart() {

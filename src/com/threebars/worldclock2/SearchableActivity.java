@@ -1,6 +1,8 @@
 package com.threebars.worldclock2;
 
 
+import java.util.List;
+
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Intent;
@@ -16,20 +18,13 @@ public class SearchableActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		adapter = new ArrayAdapter<CityTimeZone>(this,
-		        android.R.layout.simple_list_item_1);
-		setListAdapter(adapter);
-//		setContentView(R.layout.main_list);
+		setContentView(R.layout.filterable_listview);
 
-	    // Get the intent, verify the action and get the query
-	    Intent intent = getIntent();
-	    if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-	      String query = intent.getStringExtra(SearchManager.QUERY);
-	      Log.d("SEARCH", "***********query is :  " + query);
-//	      searchCities(query);
-//	      new LoadCitiesTask().execute(query);
-	    }
-	    
+		CitiesDatabase db = new CitiesDatabase(this);
+		List<CityTimeZone> cities = db.getAllCities();
+        setListAdapter(new ArrayAdapter<CityTimeZone>(this,
+                       android.R.layout.simple_list_item_1, 
+                       cities));
 		
 	}
 }

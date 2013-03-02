@@ -64,6 +64,7 @@ public class CityTimeZone {
 
 	@Override
 	public String toString() {
-		return city + ", " + country + ", " + latitude + ", " + longitude + ", " + timezone + ", " + timezoneName + ", " + preferredName;
+//		return city + ", " + country + ", " + latitude + ", " + longitude + ", " + timezone + ", " + timezoneName + ", " + preferredName;
+		return city;
 	}
 }
