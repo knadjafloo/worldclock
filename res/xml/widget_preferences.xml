@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="General Settings" >
+        <Preference
+            android:defaultValue="Default welcome message"
+            android:dialogMessage="Provide a message"
+            android:dialogTitle="Select City"
+            android:key="city_widget"
+            android:selectable="true"
+            android:summary="Click to choose a city/timezone"
+            android:title="Welcome Message" >
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetClass="com.threebars.worldclock2.SearchableActivity"
+                android:targetPackage="com.threebars.worldclock2" />
+        </Preference>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/time_display_preferences" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/show_second_ticker"
+            android:summary="@string/display_second_ticker"
+            android:title="@string/display_seconds" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

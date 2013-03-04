@@ -44,7 +44,6 @@ public class ExampleAppWidgetConfigure extends ListActivity {
 		List<CityTimeZone> cities = db.getAllCities();
 		
 		
-		
 		filterText = (EditText) findViewById(R.building_list.search_box);
 		filterText.addTextChangedListener(filterTextWatcher);
 

@@ -173,30 +173,41 @@ containing a value of this type.
         public static final int ic_launcher=0x7f020002;
     }
     public static final class id {
-        public static final int Corners=0x7f06000e;
+        public static final int Corners=0x7f060016;
+        public static final int city_name=0x7f06000a;
+        public static final int city_name_help=0x7f06000b;
         public static final int clickRemove=0x7f060000;
-        public static final int clock=0x7f06000b;
-        public static final int country=0x7f06000c;
+        public static final int clock=0x7f060013;
+        public static final int country=0x7f060014;
         public static final int drag_handle=0x7f060005;
         public static final int flingRemove=0x7f060001;
-        public static final int gmt=0x7f06000d;
-        public static final int label=0x7f06000a;
+        public static final int gmt=0x7f060015;
+        public static final int label=0x7f060012;
+        public static final int label1=0x7f06000d;
         public static final int layout=0x7f060007;
+        public static final int list_content1=0x7f06000f;
+        public static final int list_content2=0x7f060010;
         public static final int list_row=0x7f060006;
-        public static final int menu_search=0x7f06000f;
-        public static final int menu_settings=0x7f060010;
+        public static final int menu_search=0x7f060017;
+        public static final int menu_settings=0x7f060018;
         public static final int onDown=0x7f060002;
         public static final int onLongPress=0x7f060004;
         public static final int onMove=0x7f060003;
-        public static final int topPart=0x7f060009;
+        public static final int seekBar_transparency=0x7f06000e;
+        public static final int separator=0x7f060009;
+        public static final int show_seconds=0x7f06000c;
+        public static final int topPart=0x7f060011;
         public static final int update=0x7f060008;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
         public static final int appwidget_layout=0x7f030001;
-        public static final int filterable_listview=0x7f030002;
-        public static final int row2=0x7f030003;
-        public static final int widget_info=0x7f030004;
+        public static final int configure_layout=0x7f030002;
+        public static final int filterable_listview=0x7f030003;
+        public static final int header=0x7f030004;
+        public static final int my_list_item=0x7f030005;
+        public static final int row2=0x7f030006;
+        public static final int widget_info=0x7f030007;
     }
     public static final class menu {
         public static final int main_menu=0x7f090000;
@@ -248,6 +259,7 @@ containing a value of this type.
         public static final int clock_app_widget_info=0x7f040000;
         public static final int preferences=0x7f040001;
         public static final int searchable=0x7f040002;
+        public static final int widget_preferences=0x7f040003;
     }
     public static final class styleable {
         /** Attributes that can be used with a DragSortListView.

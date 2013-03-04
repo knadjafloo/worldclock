@@ -61,6 +61,14 @@
                 android:value="com.threebars.worldclock2.MainActivity" />
         </activity>
         
+	    <activity android:name=".WidgetSettingsActivity" >
+	        <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+	    
+        
         <receiver android:name="com.threebars.worldclock2.MyWidgetProvider" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

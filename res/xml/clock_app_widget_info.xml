@@ -4,6 +4,6 @@
     android:updatePeriodMillis="86400000"
     android:initialLayout="@layout/appwidget_layout"
     android:resizeMode="horizontal|vertical"
-	android:configure="com.threebars.worldclock2.ExampleAppWidgetConfigure"    
+	android:configure="com.threebars.worldclock2.WidgetSettingsActivity"    
     >
 </appwidget-provider>
