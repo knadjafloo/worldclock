@@ -12,8 +12,8 @@
         android:hint="type to filter"
         android:inputType="text"
         android:maxLines="1"
-        android:padding="2dp"
-        android:layout_margin="2dp"/>
+        android:padding="5dp"
+        android:layout_margin="12dp"/>
 
     <!-- Set height to 0, and let the weight param expand it -->
     <!-- Note the use of the default ID! This lets us use a 
