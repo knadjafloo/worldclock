@@ -30,9 +30,8 @@ public class WidgetSettingsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.configure_layout);
 
-		cityTimeZone = new CityTimeZone();
-		
 		cityName = (TextView) findViewById(R.id.city_name);
+		
 		cityName.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -50,22 +49,20 @@ public class WidgetSettingsActivity extends Activity {
 			mAppWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 			Log.w("TTTTTTTTTTTTTTTTTTTTTTTTTTTTT", mAppWidgetId + "");
 		}
-		else
-		{
-			Log.w("TTTTTTTTTTTTTTTTTTTTTTTTTTTTT", " it's null");
-		}
-
+		
 		// If they gave us an intent without the widget id, just bail.
 		if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
-//			finish();
-			Log.e("WidgetSettings", "have incorrect app widget id");
+			finish();
 		}
 
+		cityTimeZone = loadCtzFromSharedPrefs(this, mAppWidgetId );
+		cityName.setText(cityTimeZone.city);
 		
 		saveButton = (Button) findViewById(R.id.save_button);
 		cancelButton = (Button) findViewById(R.id.cancel_button);
 		
 		saveButton.setOnClickListener(saveClickListener);
+		cancelButton.setOnClickListener(cancelClickListener);
 	}
 
 	@Override
@@ -87,11 +84,25 @@ public class WidgetSettingsActivity extends Activity {
 	// Write the prefix to the SharedPreferences object for this widget
     private void saveTitlePref(Context context, int appWidgetId, CityTimeZone ctz) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(PREF_PREFIX_KEY + mAppWidgetId, 0).edit();
+        prefs.putInt("widget_id", mAppWidgetId);
 		prefs.putString("city", ctz.city);
 		prefs.putString("id", ctz.id);
         prefs.commit();
     }
 	
+    // Read the prefix from the SharedPreferences object for this widget.
+    // If there is no preference saved, get the default from a resource
+    private CityTimeZone loadCtzFromSharedPrefs(Context context, int appWidgetId) {
+    	CityTimeZone ctz = new CityTimeZone();
+        SharedPreferences prefs = context.getSharedPreferences(PREF_PREFIX_KEY + mAppWidgetId, 0);
+        String id = prefs.getString("id", null);
+        if(id != null)
+        {
+        	ctz.id = id;
+        	ctz.city = prefs.getString("city", null);
+        }
+        return ctz;
+    }
 	private View.OnClickListener saveClickListener = new View.OnClickListener() {
 
 		@Override
@@ -111,6 +122,14 @@ public class WidgetSettingsActivity extends Activity {
 			Intent resultValue = new Intent();
 			resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
 			setResult(RESULT_OK, resultValue);
+			finish();
+		}
+	};
+	
+	private View.OnClickListener cancelClickListener = new View.OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
 			finish();
 		}
 	};

@@ -13,7 +13,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 public class SearchableActivity extends ListActivity {
 
@@ -28,7 +27,7 @@ public class SearchableActivity extends ListActivity {
 
 		CitiesDatabase db = new CitiesDatabase(this);
 		List<CityTimeZone> cities = db.getAllCities();
-
+		db.close();
 		filterText = (EditText) findViewById(R.building_list.search_box);
 		filterText.addTextChangedListener(filterTextWatcher);
 
