@@ -45,6 +45,7 @@ public class MainActivity extends ListActivity {
                         CityTimeZone item = adapter.getItem(from);
                         adapter.remove(item);
                         adapter.insert(item, to);
+                        updateListPositionPreferences();
                     }
                 }
             };
@@ -55,6 +56,7 @@ public class MainActivity extends ListActivity {
                 public void remove(int which) {
                 	Log.d(TAG, "************ calling removing item : " + which);
                     adapter.remove(adapter.getItem(which));
+                    updateListPositionPreferences();
                 }
             };
 

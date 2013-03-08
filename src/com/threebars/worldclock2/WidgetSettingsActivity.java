@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 public class WidgetSettingsActivity extends Activity {
 
+	private final static String TAG = "WidgetSettingsActivity";
 	public static final int SEARCH_CODE = 1;
 	private TextView cityName;
 	private CityTimeZone cityTimeZone;
@@ -38,7 +39,6 @@ public class WidgetSettingsActivity extends Activity {
 			public void onClick(View v) {
 				Intent searchIntent = new Intent(WidgetSettingsActivity.this, SearchableActivity.class);
 				startActivityForResult(searchIntent, SEARCH_CODE);
-
 			}
 		});
 
@@ -55,8 +55,16 @@ public class WidgetSettingsActivity extends Activity {
 			finish();
 		}
 
-		cityTimeZone = loadCtzFromSharedPrefs(this, mAppWidgetId );
-		cityName.setText(cityTimeZone.city);
+		
+		cityTimeZone = loadCtzFromSharedPrefs(this, mAppWidgetId );	
+			
+		if(cityTimeZone != null)
+		{
+			cityName.setText(cityTimeZone.city);
+		}
+		else {
+			cityName.setText("Tap to configure the widget");
+		}
 		
 		saveButton = (Button) findViewById(R.id.save_button);
 		cancelButton = (Button) findViewById(R.id.cancel_button);
@@ -70,7 +78,7 @@ public class WidgetSettingsActivity extends Activity {
 		if (resultCode == RESULT_OK) {
 			switch (requestCode) {
 			case SEARCH_CODE:
-				
+				cityTimeZone = new CityTimeZone();
 				cityTimeZone.id = data.getStringExtra("city_id");
 				cityTimeZone.city = data.getStringExtra("cityName");
 				cityTimeZone.timezone = data.getStringExtra("timezone");
@@ -82,9 +90,9 @@ public class WidgetSettingsActivity extends Activity {
 	}
 	
 	// Write the prefix to the SharedPreferences object for this widget
-    private void saveTitlePref(Context context, int appWidgetId, CityTimeZone ctz) {
-        SharedPreferences.Editor prefs = context.getSharedPreferences(PREF_PREFIX_KEY + mAppWidgetId, 0).edit();
-        prefs.putInt("widget_id", mAppWidgetId);
+    public static void saveTitlePref(Context context, int appWidgetId, CityTimeZone ctz) {
+        SharedPreferences.Editor prefs = context.getSharedPreferences(PREF_PREFIX_KEY + appWidgetId, 0).edit();
+        prefs.putInt("widget_id", appWidgetId);
 		prefs.putString("city", ctz.city);
 		prefs.putString("id", ctz.id);
         prefs.commit();
@@ -92,16 +100,15 @@ public class WidgetSettingsActivity extends Activity {
 	
     // Read the prefix from the SharedPreferences object for this widget.
     // If there is no preference saved, get the default from a resource
-    private CityTimeZone loadCtzFromSharedPrefs(Context context, int appWidgetId) {
+    public static CityTimeZone loadCtzFromSharedPrefs(Context context, int appWidgetId) {
     	CityTimeZone ctz = new CityTimeZone();
-        SharedPreferences prefs = context.getSharedPreferences(PREF_PREFIX_KEY + mAppWidgetId, 0);
-        String id = prefs.getString("id", null);
-        if(id != null)
-        {
-        	ctz.id = id;
-        	ctz.city = prefs.getString("city", null);
-        }
-        return ctz;
+        SharedPreferences prefs = context.getSharedPreferences(PREF_PREFIX_KEY + appWidgetId, 0);
+    	ctz.id = prefs.getString("id", null);
+    	ctz.city = prefs.getString("city", null);
+    	
+    	Log.d(TAG, "from preference id : "+ ctz.id);
+    	Log.d(TAG, "from preference city : " + ctz.city);
+        return ctz.id == null ? null : ctz;
     }
 	private View.OnClickListener saveClickListener = new View.OnClickListener() {
 
@@ -110,9 +117,12 @@ public class WidgetSettingsActivity extends Activity {
 			final Context context = WidgetSettingsActivity.this;
 
 			
-			// When the button is clicked, save the string in our prefs and
-			// return that they clicked OK.
-			saveTitlePref(context, mAppWidgetId, cityTimeZone);
+			if(cityTimeZone != null)
+			{
+				// When the button is clicked, save the string in our prefs and
+				// return that they clicked OK.
+				saveTitlePref(context, mAppWidgetId, cityTimeZone);
+			}
 
 			// Push widget update to surface with newly set prefix
 			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
