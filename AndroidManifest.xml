@@ -71,7 +71,6 @@
         <receiver android:name="com.threebars.worldclock2.MyWidgetProvider" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="android.appwidget.action.APPWIDGET_ENABLED"/> 
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

@@ -2,6 +2,7 @@ package com.threebars.worldclock2;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,18 +30,7 @@ public class WidgetSettingsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.configure_layout);
-
-		cityName = (TextView) findViewById(R.id.city_name);
-		
-		cityName.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Intent searchIntent = new Intent(WidgetSettingsActivity.this, SearchableActivity.class);
-				startActivityForResult(searchIntent, SEARCH_CODE);
-			}
-		});
+		mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
 
 		// Find the widget id from the intent.
 		Intent intent = getIntent();
@@ -57,7 +47,21 @@ public class WidgetSettingsActivity extends Activity {
 
 		
 		cityTimeZone = loadCtzFromSharedPrefs(this, mAppWidgetId );	
-			
+		
+		setResult(RESULT_CANCELED);
+		setContentView(R.layout.configure_layout);
+		cityName = (TextView) findViewById(R.id.city_name);
+
+		cityName.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent searchIntent = new Intent(WidgetSettingsActivity.this, SearchableActivity.class);
+//				searchIntent.putExtra("widget_id", mAppWidgetId);
+				startActivityForResult(searchIntent, SEARCH_CODE);
+			}
+		});
+		
 		if(cityTimeZone != null)
 		{
 			cityName.setText(cityTimeZone.city);
@@ -66,6 +70,8 @@ public class WidgetSettingsActivity extends Activity {
 			cityName.setText("Tap to configure the widget");
 		}
 		
+		
+		
 		saveButton = (Button) findViewById(R.id.save_button);
 		cancelButton = (Button) findViewById(R.id.cancel_button);
 		
@@ -73,6 +79,10 @@ public class WidgetSettingsActivity extends Activity {
 		cancelButton.setOnClickListener(cancelClickListener);
 	}
 
+	private void reset() {
+		mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+	}
+	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == RESULT_OK) {
@@ -84,6 +94,7 @@ public class WidgetSettingsActivity extends Activity {
 				cityTimeZone.timezone = data.getStringExtra("timezone");
 				cityTimeZone.timezoneName = data.getStringExtra("timezone_name");
 				cityName.setText(cityTimeZone.city);
+//				mAppWidgetId = data.getIntExtra("widget_id", -1);
 				break;
 			}
 		}
@@ -92,7 +103,7 @@ public class WidgetSettingsActivity extends Activity {
 	// Write the prefix to the SharedPreferences object for this widget
     public static void saveTitlePref(Context context, int appWidgetId, CityTimeZone ctz) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(PREF_PREFIX_KEY + appWidgetId, 0).edit();
-        prefs.putInt("widget_id", appWidgetId);
+//        prefs.putInt("widget_id", appWidgetId);
 		prefs.putString("city", ctz.city);
 		prefs.putString("id", ctz.id);
         prefs.commit();
@@ -121,9 +132,35 @@ public class WidgetSettingsActivity extends Activity {
 			{
 				// When the button is clicked, save the string in our prefs and
 				// return that they clicked OK.
-				saveTitlePref(context, mAppWidgetId, cityTimeZone);
+				if(mAppWidgetId > 0)
+				{
+					saveTitlePref(context, mAppWidgetId, cityTimeZone);
+				}
 			}
 
+			// Configuration...
+			// Call onUpdate for the first time.
+//			Log.d("Ok Button", "First onUpdate broadcast sending...");
+//			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+//			ComponentName thisAppWidget = new ComponentName(context.getPackageName(), WidgetSettingsActivity.class.getName());
+//			// N.B.: we want to launch this intent to our AppWidgetProvider!
+//			int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
+//
+//			Intent firstUpdate = new Intent(context, MyWidgetProvider.class);
+////			firstUpdate.setAction("android.appwidget.action.APPWIDGET_UPDATE");
+//			firstUpdate.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+//			//identify which widget we want only updated to be used in widgetProvider
+//			firstUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+//			firstUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
+//			context.sendBroadcast(firstUpdate);
+//			Log.d("Ok Button", "000---> First onUpdate broadcast sent for widget_id : " + mAppWidgetId + " city : " + cityTimeZone.city);
+//			// Return the original widget ID, found in onCreate().
+//			Intent resultValue = new Intent();
+//			resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+//			setResult(RESULT_OK, resultValue);
+//			finish();
+
+			
 			// Push widget update to surface with newly set prefix
 			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZone);
@@ -140,6 +177,7 @@ public class WidgetSettingsActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
+			setResult(RESULT_CANCELED);
 			finish();
 		}
 	};
