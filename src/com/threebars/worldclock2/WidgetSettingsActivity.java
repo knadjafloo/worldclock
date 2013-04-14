@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class WidgetSettingsActivity extends Activity {
 
@@ -137,6 +138,10 @@ public class WidgetSettingsActivity extends Activity {
 					saveTitlePref(context, mAppWidgetId, cityTimeZone);
 				}
 			}
+			else {
+				Toast.makeText(context, "Please select a city", Toast.LENGTH_SHORT).show();
+				return;
+			}
 
 			// Configuration...
 			// Call onUpdate for the first time.
@@ -160,7 +165,6 @@ public class WidgetSettingsActivity extends Activity {
 //			setResult(RESULT_OK, resultValue);
 //			finish();
 
-			
 			// Push widget update to surface with newly set prefix
 			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZone);
