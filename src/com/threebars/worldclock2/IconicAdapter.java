@@ -1,10 +1,15 @@
 package com.threebars.worldclock2;
 
 import java.util.List;
+import java.util.TimeZone;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +56,18 @@ public class IconicAdapter extends ArrayAdapter<CityTimeZone> implements Filtera
 		label.setText(cityTimeZone.city);
 		
 		CustomDigitalClock clock = (CustomDigitalClock) row.findViewById(R.id.clock);
-		clock.setTimeZone(cityTimeZone.getTimezone());
+		
+//		clock.setTimeZone(cityTimeZone.getTimezone());
+		String timeZoneName = TimeUtil.getTimeZone(cityTimeZone.getTimezoneName());
+		Log.d("!!!!", "for timeZoneName : " + cityTimeZone.getTimezoneName() + "       got: " + timeZoneName + " tz  : " + cityTimeZone.getTimezone());
+		if(timeZoneName != null)
+		{
+			clock.setTimeZone(DateTimeZone.forID(timeZoneName).toTimeZone());	
+		}
+		else	//never should get here
+		{
+			clock.setTimeZone(cityTimeZone.getTimezone());
+		}
 		
 		TextView country  = (TextView) row.findViewById(R.id.country);
 		country.setText(cityTimeZone.country);

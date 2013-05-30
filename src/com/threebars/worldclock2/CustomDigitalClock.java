@@ -50,7 +50,7 @@ public class CustomDigitalClock extends TextView {
 
     private Runnable mTicker;
     private Handler mHandler;
-
+    private Context mContext;
     private boolean mTickerStopped = false;
     
 
@@ -64,10 +64,17 @@ public class CustomDigitalClock extends TextView {
     public CustomDigitalClock(Context context, AttributeSet attrs) {
         super(context, attrs);
         initClock(context);
+        mContext = context;
     }
 
+    @Deprecated
     public void setTimeZone(String tz) {
     	mCalendar.setTimeZone(TimeZone.getTimeZone(tz));
+    }
+    
+    public void setTimeZone(TimeZone tz) {
+    	mCalendar.setTimeZone(tz);
+    	initClock(mContext);
     }
     
     public void setShowSeconds(boolean showSeconds) {
