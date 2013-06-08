@@ -58,16 +58,7 @@ public class IconicAdapter extends ArrayAdapter<CityTimeZone> implements Filtera
 		CustomDigitalClock clock = (CustomDigitalClock) row.findViewById(R.id.clock);
 		
 //		clock.setTimeZone(cityTimeZone.getTimezone());
-		String timeZoneName = TimeUtil.getTimeZone(cityTimeZone.getTimezoneName());
-		Log.d("!!!!", "for timeZoneName : " + cityTimeZone.getTimezoneName() + "       got: " + timeZoneName + " tz  : " + cityTimeZone.getTimezone());
-		if(timeZoneName != null)
-		{
-			clock.setTimeZone(DateTimeZone.forID(timeZoneName).toTimeZone());	
-		}
-		else	//never should get here
-		{
-			clock.setTimeZone(cityTimeZone.getTimezone());
-		}
+		clock.setTimeZone(TimeUtil.getDSTTimeZone(cityTimeZone));
 		
 		TextView country  = (TextView) row.findViewById(R.id.country);
 		country.setText(cityTimeZone.country);

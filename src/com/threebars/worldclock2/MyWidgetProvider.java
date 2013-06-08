@@ -1,6 +1,15 @@
 package com.threebars.worldclock2;
 
 import static com.threebars.worldclock2.WidgetSettingsActivity.PREF_PREFIX_KEY;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
+import org.joda.time.DateTime;
+
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -9,14 +18,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.RemoteViews;
 
 public class MyWidgetProvider extends AppWidgetProvider {
 
 	private static final String TAG = "AppWidgetProvider";
+	public static final String UPDATE_ALL_WIDGETS = "com.threebars.worldclock2.UPDATE_ALL_WIDGETS";
 	
-	
+	private static AlarmManager alarmManager;
+	private static PendingIntent pendingIntentAlarm;
 //	public void onReceive(Context context, Intent intent) {
 //        // Protect against rogue update broadcasts (not really a security issue,
 //        // just filter bad broacasts out so subclasses are less likely to crash).
@@ -53,9 +65,63 @@ public class MyWidgetProvider extends AppWidgetProvider {
 //        }
 //    }
 	
+	@Override
+	public void onEnabled(Context context) {
+		//initialize alarm Manager
+		if (alarmManager == null) {
+			Log.d("onEnabled", "$$$$$$$$$$$ calling on enabled and starting alarm manager...");
+			alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+			Intent intentUpdate = new Intent(context, MyWidgetProvider.class);
+		      intentUpdate.setAction(MyWidgetProvider.UPDATE_ALL_WIDGETS);//Set an action anyway to filter it in onReceive()
+		      //We will need the exact instance to identify the intent.
+		      pendingIntentAlarm = PendingIntent.getBroadcast(context,
+	                                                            0,
+	                                                            intentUpdate,
+	                                                            PendingIntent.FLAG_UPDATE_CURRENT);
+		    GregorianCalendar nextMinute = (GregorianCalendar)Calendar.getInstance();
+		    nextMinute.add(Calendar.MINUTE, 1);
+		    nextMinute.set(Calendar.SECOND, 0);
+			
+			alarmManager.setRepeating(AlarmManager.RTC, nextMinute.getTimeInMillis() , DateUtils.MINUTE_IN_MILLIS, pendingIntentAlarm);
+		}
+	}
+	
+	public static void updateAllWidgets(final Context context, final int layoutResourceId, final Class<? extends AppWidgetProvider> appWidgetClass) {
+		RemoteViews remoteViews = new RemoteViews(context.getPackageName(), layoutResourceId);
+
+		AppWidgetManager manager = AppWidgetManager.getInstance(context);
+		final int[] appWidgetIds = manager.getAppWidgetIds(new ComponentName(context, appWidgetClass));
+
+		for (int i = 0; i < appWidgetIds.length; ++i) {
+			manager.updateAppWidget(appWidgetIds[i], remoteViews);
+		}
+	}
+	
+	@Override
+	public void onDisabled(Context context) {
+		Log.d("onDisabled", "calling onDisabled............................");
+		// cancel the alarm manager since last instance is deleted
+//	      Intent intentUpdate = new Intent(context, MyWidgetProvider.class);
+//	      //AlarmManager are identified with Intent's Action and Uri.
+//	      intentUpdate.setAction(MyWidgetProvider.UPDATE_ALL_WIDGETS);
+//	      //For a global AlarmManager, don't put the uri to cancel
+//	      //all the AlarmManager with action UPDATE_ONE.
+//	      PendingIntent pendingIntentAlarm = PendingIntent.getBroadcast(context,
+//	                                                                    0,
+//	                                                                    intentUpdate,
+//	                                              PendingIntent.FLAG_UPDATE_CURRENT);
+	      if(alarmManager != null)
+	      {
+	    	  alarmManager.cancel(pendingIntentAlarm);
+	      }
+	      Log.d("cancelAlarmManager", "Cancelled Alarm. Action = " + MyWidgetProvider.UPDATE_ALL_WIDGETS);
+	}
+	
 	public void onReceive(Context context, Intent intent) {
+		
 	    String action = intent.getAction();
-	    if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
+	    if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) { 
 	        Bundle extras = intent.getExtras();
 	        if (extras != null) {
 	            int[] appWidgetIds = extras
@@ -64,6 +130,20 @@ public class MyWidgetProvider extends AppWidgetProvider {
 	                this.onUpdate(context, AppWidgetManager.getInstance(context), appWidgetIds);//here you can call onUpdate method, and update your views as you wish
 	            }
 	        }
+	        
+	    } else if(action.equals(UPDATE_ALL_WIDGETS)) {
+	    	//get all widgetIds currently active
+	    	Log.d(TAG, "updating allwidgets..........");
+	    	
+	    	 AppWidgetManager widgetManager = AppWidgetManager.getInstance(context);
+	         ComponentName appWidgetName = 
+	             new ComponentName(context, MyWidgetProvider.class);    
+	         int[] appWidgetIds = widgetManager.getAppWidgetIds(appWidgetName);
+	         onUpdate(context, widgetManager, appWidgetIds);
+	    	
+//	    	AppWidgetManager manager = AppWidgetManager.getInstance(context);
+//	    	final int[] appWidgetIds = manager.getAppWidgetIds(new ComponentName(context, MyWidgetProvider.class));
+//	    	this.onUpdate(context, AppWidgetManager.getInstance(context), appWidgetIds);//here you can call onUpdate method, and update your views as you wish
 	    } else if (AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) {
 	        Bundle extras = intent.getExtras();
 	        if (extras != null
@@ -118,7 +198,10 @@ public class MyWidgetProvider extends AppWidgetProvider {
         // the layout from our package).
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.appwidget_layout);
         if(ctz != null) {
-        	views.setTextViewText(R.id.update, ctz.city);
+        	DateFormat df = new SimpleDateFormat("hh:mm");
+			DateTime dt = new DateTime(TimeUtil.getTimeZone(ctz.getTimezoneName()));
+        	views.setTextViewText(R.id.update, ctz.city + " " + df.format(dt.toDate())) ;
+        	
         }
         ComponentName thisWidget = new ComponentName(context, MyWidgetProvider.class);
      // Register an onClickListener
@@ -136,6 +219,8 @@ public class MyWidgetProvider extends AppWidgetProvider {
         // Tell the widget manager
 //		AppWidgetManager.getInstance( context ).updateAppWidget( thisWidget, views );
 		appWidgetManager.updateAppWidget(appWidgetId, views);
+		
+		
 		
     }
 }

@@ -1,8 +1,9 @@
 package com.threebars.worldclock2;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -168,7 +169,7 @@ public class WidgetSettingsActivity extends Activity {
 			// Push widget update to surface with newly set prefix
 			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZone);
-
+			
 			// Make sure we pass back the original appWidgetId
 			Intent resultValue = new Intent();
 			resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
