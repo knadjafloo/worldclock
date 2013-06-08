@@ -108,6 +108,9 @@ public class WidgetSettingsActivity extends Activity {
 //        prefs.putInt("widget_id", appWidgetId);
 		prefs.putString("city", ctz.city);
 		prefs.putString("id", ctz.id);
+		prefs.putString("timezoneName", ctz.timezoneName);
+		prefs.putString("timezone", ctz.timezone);
+				
         prefs.commit();
     }
 	
@@ -118,6 +121,8 @@ public class WidgetSettingsActivity extends Activity {
         SharedPreferences prefs = context.getSharedPreferences(PREF_PREFIX_KEY + appWidgetId, 0);
     	ctz.id = prefs.getString("id", null);
     	ctz.city = prefs.getString("city", null);
+    	ctz.timezone = prefs.getString("timezone", null);
+    	ctz.timezoneName = prefs.getString("timezoneName", null);
     	
     	Log.d(TAG, "from preference id : "+ ctz.id);
     	Log.d(TAG, "from preference city : " + ctz.city);

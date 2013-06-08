@@ -8,6 +8,9 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -198,9 +201,11 @@ public class MyWidgetProvider extends AppWidgetProvider {
         // the layout from our package).
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.appwidget_layout);
         if(ctz != null) {
-        	DateFormat df = new SimpleDateFormat("hh:mm");
-			DateTime dt = new DateTime(TimeUtil.getTimeZone(ctz.getTimezoneName()));
-        	views.setTextViewText(R.id.update, ctz.city + " " + df.format(dt.toDate())) ;
+        	DateTimeFormatter df = DateTimeFormat.forPattern("hh:mm a");
+        	
+			DateTime dt = new DateTime(DateTimeZone.forID(TimeUtil.getTimeZone(ctz.getTimezoneName())));
+			Log.d(TAG, "setting timezone : " + ctz.getTimezoneName() + " actual :  " + TimeUtil.getTimeZone(ctz.getTimezoneName()) + " actual time : " + dt.toString());
+        	views.setTextViewText(R.id.update, ctz.city + " " + df.print(dt)) ;
         	
         }
         ComponentName thisWidget = new ComponentName(context, MyWidgetProvider.class);
