@@ -15,5 +15,17 @@
 	<string name="display_second_ticker">Display the second ticker</string>
 	<string name="display_seconds">Display Seconds</string>
 	<string name="appwidget_prefix_default">widget_</string>
+	<string name="use_24hour_clock">Use 24 hour clock</string>
+	
+	<string name="cancel">Cancel</string>
+	<string name="save">Save</string>
+	<string name="clock_settings">Clock Settings</string>
+	<string name="select_city_desc">Select City/Timezone to display</string>
+	<string name="city_timezone">City / Timezone</string>
+	<string name="select_city">Select City</string>
+	
+	<string name="loading">Loading...</string>
+	
+	
 	
 </resources>

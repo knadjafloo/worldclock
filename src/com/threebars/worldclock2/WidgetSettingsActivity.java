@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +21,7 @@ public class WidgetSettingsActivity extends Activity {
 	private final static String TAG = "WidgetSettingsActivity";
 	public static final int SEARCH_CODE = 1;
 	private TextView cityName;
+	private CheckBox use24CheckBox;
 	private CityTimeZone cityTimeZone;
 	
 	private Button saveButton;
@@ -46,13 +48,19 @@ public class WidgetSettingsActivity extends Activity {
 		if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
 			finish();
 		}
-
 		
-		cityTimeZone = loadCtzFromSharedPrefs(this, mAppWidgetId );	
+		
+		cityTimeZone = loadCtzFromSharedPrefs(this, mAppWidgetId );
+		
+		
 		
 		setResult(RESULT_CANCELED);
 		setContentView(R.layout.configure_layout);
+		
 		cityName = (TextView) findViewById(R.id.city_name);
+		use24CheckBox = (CheckBox)findViewById(R.id.use_24hours);
+		use24CheckBox.setChecked(loadUse24HoursFromSharedPRefs(this, mAppWidgetId));
+		
 
 		cityName.setOnClickListener(new OnClickListener() {
 
@@ -80,10 +88,6 @@ public class WidgetSettingsActivity extends Activity {
 		saveButton.setOnClickListener(saveClickListener);
 		cancelButton.setOnClickListener(cancelClickListener);
 	}
-
-	private void reset() {
-		mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-	}
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -103,14 +107,14 @@ public class WidgetSettingsActivity extends Activity {
 	}
 	
 	// Write the prefix to the SharedPreferences object for this widget
-    public static void saveTitlePref(Context context, int appWidgetId, CityTimeZone ctz) {
+    public static void saveTitlePref(Context context, int appWidgetId, CityTimeZone ctz, boolean use24Hours) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(PREF_PREFIX_KEY + appWidgetId, 0).edit();
 //        prefs.putInt("widget_id", appWidgetId);
 		prefs.putString("city", ctz.city);
 		prefs.putString("id", ctz.id);
 		prefs.putString("timezoneName", ctz.timezoneName);
 		prefs.putString("timezone", ctz.timezone);
-				
+		prefs.putBoolean("use24hrs", use24Hours);
         prefs.commit();
     }
 	
@@ -128,6 +132,19 @@ public class WidgetSettingsActivity extends Activity {
     	Log.d(TAG, "from preference city : " + ctz.city);
         return ctz.id == null ? null : ctz;
     }
+    
+    public static boolean loadUse24HoursFromSharedPRefs(Context context, int appWidgetId) {
+    	SharedPreferences prefs = context.getSharedPreferences(PREF_PREFIX_KEY + appWidgetId, 0);
+    	if(prefs != null) {
+    		return prefs.getBoolean("use24hrs", false);
+    	}
+    	else {
+    		return false;
+    	}
+    	
+    }
+    
+    
 	private View.OnClickListener saveClickListener = new View.OnClickListener() {
 
 		@Override
@@ -141,7 +158,7 @@ public class WidgetSettingsActivity extends Activity {
 				// return that they clicked OK.
 				if(mAppWidgetId > 0)
 				{
-					saveTitlePref(context, mAppWidgetId, cityTimeZone);
+					saveTitlePref(context, mAppWidgetId, cityTimeZone, use24CheckBox.isChecked());
 				}
 			}
 			else {
@@ -173,7 +190,7 @@ public class WidgetSettingsActivity extends Activity {
 
 			// Push widget update to surface with newly set prefix
 			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZone);
+			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZone, use24CheckBox.isChecked());
 			
 			// Make sure we pass back the original appWidgetId
 			Intent resultValue = new Intent();

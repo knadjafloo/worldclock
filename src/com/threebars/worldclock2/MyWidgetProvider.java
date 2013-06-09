@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -186,14 +187,15 @@ public class MyWidgetProvider extends AppWidgetProvider {
 			
 			//read the info from the shared preference and update it
 			CityTimeZone ctz = WidgetSettingsActivity.loadCtzFromSharedPrefs(context, widgetId);
+			boolean use24Hours = WidgetSettingsActivity.loadUse24HoursFromSharedPRefs(context, widgetId);
 			Log.d(TAG,  " onUpdate: widgetId ::::::::::::::::::::::: " + widgetId + " city : " + (ctz == null ? "null " : ctz.city));
-			updateAppWidget(context, appWidgetManager, widgetId, "", ctz);
+			updateAppWidget(context, appWidgetManager, widgetId, "", ctz, use24Hours);
 		}
 	}
 	
 	
 	static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-            int appWidgetId, String titlePrefix, CityTimeZone ctz) {
+            int appWidgetId, String titlePrefix, CityTimeZone ctz, boolean use24Hours) {
 //        Log.d(TAG, "updateAppWidget appWidgetId=" + appWidgetId + " city: " + (ctz == null ? "null" : ctz.city));
 
         // Construct the RemoteViews object.  It takes the package name (in our case, it's our
@@ -201,11 +203,22 @@ public class MyWidgetProvider extends AppWidgetProvider {
         // the layout from our package).
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.appwidget_layout);
         if(ctz != null) {
-        	DateTimeFormatter df = DateTimeFormat.forPattern("hh:mm a");
+        	String timeFormat = "hh:mm a";
+        	if(use24Hours)
+        	{
+        		timeFormat = "HH:mm";
+        	}
+        	DateTimeFormatter df = DateTimeFormat.forPattern(timeFormat);
+        	DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy/MM/dd");
+        	
         	
 			DateTime dt = new DateTime(DateTimeZone.forID(TimeUtil.getTimeZone(ctz.getTimezoneName())));
 			Log.d(TAG, "setting timezone : " + ctz.getTimezoneName() + " actual :  " + TimeUtil.getTimeZone(ctz.getTimezoneName()) + " actual time : " + dt.toString());
-        	views.setTextViewText(R.id.update, ctz.city + " " + df.print(dt)) ;
+//			views.setTextViewText(R.id.dateDate, defaultFormat.print(dt));
+			views.setTextViewText(R.id.dateDate, DateFormat.getDateInstance().format(dt.toDate()));
+        	views.setTextViewText(R.id.dateTime, df.print(dt)) ;
+			views.setTextViewText(R.id.dateCity, ctz.city);
+			
         	
         }
         ComponentName thisWidget = new ComponentName(context, MyWidgetProvider.class);

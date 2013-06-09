@@ -10,7 +10,7 @@
         style="?android:attr/listSeparatorTextViewStyle"
         android:id="@+id/separator"
         android:layout_margin="5dp"
-        android:text="City / Timezone"
+        android:text="@string/city_timezone"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#757678"
@@ -27,9 +27,9 @@
         android:longClickable="false"
         android:paddingBottom="1dip"
         android:paddingTop="1dip"
-        android:text="Select City"
+        android:text="@string/select_city"
         
-        android:textSize="17dip"
+        android:textSize="17sp"
         android:textStyle="bold" />
 
     <TextView
@@ -43,7 +43,7 @@
         android:longClickable="false"
         android:paddingBottom="1dip"
         android:paddingTop="1dip"
-        android:text="Select City/Timezone to display"
+        android:text="@string/select_city_desc"
         android:textColor="#808080"
         android:textSize="13sp" />
     
@@ -53,31 +53,31 @@
         style="?android:attr/listSeparatorTextViewStyle"
         android:id="@+id/separator"
         android:layout_margin="5dp"
-        android:text="Clock Settings"
+        android:text="@string/clock_settings"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#757678"
         android:textColor="#f5c227" />
 
     <CheckBox
-        android:id="@+id/show_seconds"
+        android:id="@+id/use_24hours"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Show Seconds" />
-
+        android:text="@string/use_24hour_clock" />
+<!--
     <TextView
         android:id="@+id/label1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Select background transparency"
         android:layout_margin="5dp" />
-
+ 
     <SeekBar
         android:id="@+id/seekBar_transparency"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" 
         android:layout_margin="5dp"/>
-
+ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" 
@@ -87,13 +87,13 @@
             android:id="@+id/cancel_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cancel" />
+            android:text="@string/cancel" />
 
         <Button
             android:id="@+id/save_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save" />
+            android:text="@string/save" />
 
     </LinearLayout>
     
