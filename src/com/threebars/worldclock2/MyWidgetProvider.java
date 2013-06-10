@@ -209,13 +209,17 @@ public class MyWidgetProvider extends AppWidgetProvider {
         		timeFormat = "HH:mm";
         	}
         	DateTimeFormatter df = DateTimeFormat.forPattern(timeFormat);
-        	DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy/MM/dd");
+        	
         	
         	
 			DateTime dt = new DateTime(DateTimeZone.forID(TimeUtil.getTimeZone(ctz.getTimezoneName())));
-			Log.d(TAG, "setting timezone : " + ctz.getTimezoneName() + " actual :  " + TimeUtil.getTimeZone(ctz.getTimezoneName()) + " actual time : " + dt.toString());
-//			views.setTextViewText(R.id.dateDate, defaultFormat.print(dt));
-			views.setTextViewText(R.id.dateDate, DateFormat.getDateInstance().format(dt.toDate()));
+			
+			 DateTimeFormatter fmt = DateTimeFormat.mediumDate();
+			 String mediumDate = fmt.print(dt);
+			 fmt = DateTimeFormat.forPattern("EE");	//get day of the week
+			 String day = fmt.print(dt);
+
+			views.setTextViewText(R.id.dateDate, day + " " + mediumDate);
         	views.setTextViewText(R.id.dateTime, df.print(dt)) ;
 			views.setTextViewText(R.id.dateCity, ctz.city);
 			

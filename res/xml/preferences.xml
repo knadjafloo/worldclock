@@ -10,6 +10,7 @@
             android:title="@string/display_seconds" />
 
     </PreferenceCategory>
+    <!-- 
     <PreferenceCategory
         android:title="General Settings" >
         <EditTextPreference
@@ -20,5 +21,5 @@
             android:summary="Define the Welcome message to be shown"
             android:title="Welcome Message" />
     </PreferenceCategory>
-
+ -->
 </PreferenceScreen>
