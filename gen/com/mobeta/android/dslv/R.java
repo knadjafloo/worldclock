@@ -8,11 +8,11 @@ package com.mobeta.android.dslv;
 
 public final class R {
 	public static final class id {
-		public static final int clickRemove = 0x7f060000;
-		public static final int onLongPress = 0x7f060004;
-		public static final int flingRemove = 0x7f060001;
-		public static final int onDown = 0x7f060002;
-		public static final int onMove = 0x7f060003;
+		public static final int clickRemove = 0x7f050000;
+		public static final int onLongPress = 0x7f050004;
+		public static final int flingRemove = 0x7f050001;
+		public static final int onDown = 0x7f050002;
+		public static final int onMove = 0x7f050003;
 	}
 	public static final class styleable {
 		public static final int DragSortListView_use_default_controller = 17;

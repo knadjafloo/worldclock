@@ -55,6 +55,7 @@ public class CustomDigitalClock extends TextView {
     
 
     String mFormat;
+	private TimeZone mTimeZone;
 
     public CustomDigitalClock(Context context) {
         super(context);
@@ -74,6 +75,7 @@ public class CustomDigitalClock extends TextView {
     
     public void setTimeZone(TimeZone tz) {
     	mCalendar.setTimeZone(tz);
+    	mTimeZone = tz;
     	initClock(mContext);
     }
     
@@ -86,10 +88,11 @@ public class CustomDigitalClock extends TextView {
     }
     
     private void initClock(Context context) {
-        Resources r = getResources();
-
         if (mCalendar == null) {
-            mCalendar = Calendar.getInstance();
+			if (mTimeZone != null)
+				mCalendar = Calendar.getInstance(mTimeZone);
+			else
+				mCalendar = Calendar.getInstance();
         }
 
         mFormatChangeObserver = new FormatChangeObserver();

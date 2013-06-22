@@ -2,11 +2,8 @@ package com.threebars.worldclock2;
 
 import static com.threebars.worldclock2.WidgetSettingsActivity.PREF_PREFIX_KEY;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -21,6 +18,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -202,29 +202,28 @@ public class MyWidgetProvider extends AppWidgetProvider {
         // package, but it needs this because on the other side it's the widget host inflating
         // the layout from our package).
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.appwidget_layout);
-        if(ctz != null) {
-        	String timeFormat = "hh:mm a";
-        	if(use24Hours)
-        	{
-        		timeFormat = "HH:mm";
-        	}
-        	DateTimeFormatter df = DateTimeFormat.forPattern(timeFormat);
-        	
-        	
-        	
+		if (ctz != null) {
+			String timeFormat = "hh:mm a";
+			if (use24Hours) {
+				timeFormat = "HH:mm";
+			}
+			DateTimeFormatter df = DateTimeFormat.forPattern(timeFormat);
+
 			DateTime dt = new DateTime(DateTimeZone.forID(TimeUtil.getTimeZone(ctz.getTimezoneName())));
-			
-			 DateTimeFormatter fmt = DateTimeFormat.mediumDate();
-			 String mediumDate = fmt.print(dt);
-			 fmt = DateTimeFormat.forPattern("EE");	//get day of the week
-			 String day = fmt.print(dt);
+
+			DateTimeFormatter fmt = DateTimeFormat.mediumDate();
+			String mediumDate = fmt.print(dt);
+			fmt = DateTimeFormat.forPattern("EE"); // get day of the week
+			String day = fmt.print(dt);
+
+			/*android.graphics.Color.TRANSPARENT */
+//			views.setInt(R.id.c_widget_layout, "setBackgroundResource", android.graphics.Color.YELLOW); // this must be set first
 
 			views.setTextViewText(R.id.dateDate, day + " " + mediumDate);
-        	views.setTextViewText(R.id.dateTime, df.print(dt)) ;
+			views.setTextViewText(R.id.dateTime, df.print(dt));
 			views.setTextViewText(R.id.dateCity, ctz.city);
-			
-        	
-        }
+
+		}
         ComponentName thisWidget = new ComponentName(context, MyWidgetProvider.class);
      // Register an onClickListener
 		Intent intent = new Intent(context, WidgetSettingsActivity.class);
@@ -241,8 +240,23 @@ public class MyWidgetProvider extends AppWidgetProvider {
         // Tell the widget manager
 //		AppWidgetManager.getInstance( context ).updateAppWidget( thisWidget, views );
 		appWidgetManager.updateAppWidget(appWidgetId, views);
-		
-		
-		
     }
+	
+	public static Bitmap getBackground (int bgcolor)
+	{
+	try
+	    {
+	        Bitmap.Config config = Bitmap.Config.ARGB_8888; // Bitmap.Config.ARGB_8888 Bitmap.Config.ARGB_4444 to be used as these two config constant supports transparency
+	        Bitmap bitmap = Bitmap.createBitmap(2, 2, config); // Create a Bitmap
+	 
+	        Canvas canvas =  new Canvas(bitmap); // Load the Bitmap to the Canvas
+	        canvas.drawColor(bgcolor); //Set the color
+	 
+	        return bitmap;
+	    }
+	    catch (Exception e)
+	    {
+	        return null;
+	    }
+	}
 }
