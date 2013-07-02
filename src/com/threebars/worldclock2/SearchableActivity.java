@@ -34,6 +34,10 @@ public class SearchableActivity extends ListActivity {
 		adapter = new ArrayAdapter<CityTimeZone>(this, android.R.layout.simple_list_item_1, cities);
 		setListAdapter(adapter);
 
+		Bundle extras = getIntent().getExtras();
+		final boolean one = extras != null ? extras.getBoolean("1") : false;
+		final boolean two = extras != null ? extras.getBoolean("2") : false;
+		
 		ListView listView = getListView();
 		listView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -44,7 +48,8 @@ public class SearchableActivity extends ListActivity {
 				i.putExtra("cityName", item.getCity());
 				i.putExtra("timezone", item.getTimezone());
 				i.putExtra("timezone_name", item.getTimezoneName());
-				
+				i.putExtra("1", one);
+				i.putExtra("2", two);
 				setResult(RESULT_OK, i);
 				finish();
 			}

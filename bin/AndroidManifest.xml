@@ -28,6 +28,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <!-- No category needed, because the Intent will specify this class component-->
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
             <!-- Points to searchable meta data. -->
@@ -42,8 +43,11 @@
         
         <!-- Points to searchable activity so the whole app can invoke search. -->
         <meta-data android:name="android.app.default_searchable"
-                   android:value=".WorldClockWidgetActivity" />
+                   android:value=".MainActivity" />
         
+        
+        
+
            <!-- this is the searchable activity; it performs searches -->
 	    <activity android:name=".SearchableActivity" >
 	        <intent-filter>
@@ -61,18 +65,29 @@
                 android:value="com.threebars.worldclock2.MainActivity" />
         </activity>
         
+	    
+        
+        
 	    <activity android:name=".WidgetSettingsActivity" >
 	        <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
-        
-        <receiver android:name="com.threebars.worldclock2.MyWidgetProvider" >
+
+        <receiver android:name="com.threebars.worldclock2.MyWidgetProvider" android:label="@string/small_widget_name" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data	android:name="android.appwidget.provider"
-                android:resource="@layout/clock_app_widget_info" />
+                android:resource="@xml/clock_app_widget_info" />
+        </receiver>
+        
+       <receiver android:name="com.threebars.worldclock2.LargeAppWidgetProvider" android:label="@string/medium_widget_name" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data	android:name="android.appwidget.provider"
+                android:resource="@xml/clock_app_widget_4x2_info" />
         </receiver>
 
 </application>

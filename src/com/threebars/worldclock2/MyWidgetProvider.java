@@ -4,6 +4,7 @@ import static com.threebars.worldclock2.WidgetSettingsActivity.PREF_PREFIX_KEY;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -14,6 +15,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,41 +35,7 @@ public class MyWidgetProvider extends AppWidgetProvider {
 	
 	private static AlarmManager alarmManager;
 	private static PendingIntent pendingIntentAlarm;
-//	public void onReceive(Context context, Intent intent) {
-//        // Protect against rogue update broadcasts (not really a security issue,
-//        // just filter bad broacasts out so subclasses are less likely to crash).
-//        String action = intent.getAction();
-//        if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
-//            Bundle extras = intent.getExtras();
-//            if (extras != null) {
-////                int[] appWidgetIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);
-//                
-//                int widgetID = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
-//        		Log.d(TAG, " received update request for widget_id : " + widgetID);
-//        		// If there is no single ID, call the super implementation.
-//        		if (widgetID == AppWidgetManager.INVALID_APPWIDGET_ID)
-//        		{
-//        			super.onReceive(context, intent);
-//        		}
-//        		// Otherwise call our onUpdate() passing a one element array, with the retrieved ID.
-//        		else
-//        			this.onUpdate(context, AppWidgetManager.getInstance(context), new int[] { widgetID });
-//            }
-//        }
-//        else if (AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) {
-//            Bundle extras = intent.getExtras();
-//            if (extras != null && extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_ID)) {
-//                final int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);
-//                this.onDeleted(context, new int[] { appWidgetId });
-//            }
-//        }
-//        else if (AppWidgetManager.ACTION_APPWIDGET_ENABLED.equals(action)) {
-//            this.onEnabled(context);
-//        }
-//        else if (AppWidgetManager.ACTION_APPWIDGET_DISABLED.equals(action)) {
-//            this.onDisabled(context);
-//        }
-//    }
+
 	
 	@Override
 	public void onEnabled(Context context) {
@@ -143,7 +111,13 @@ public class MyWidgetProvider extends AppWidgetProvider {
 	         ComponentName appWidgetName = 
 	             new ComponentName(context, MyWidgetProvider.class);    
 	         int[] appWidgetIds = widgetManager.getAppWidgetIds(appWidgetName);
+	         
+	         ComponentName appWidgetName2 = 
+		             new ComponentName(context, LargeAppWidgetProvider.class);    
+		         int[] appWidgetIds2 = widgetManager.getAppWidgetIds(appWidgetName2);
+	         
 	         onUpdate(context, widgetManager, appWidgetIds);
+	         onUpdate(context, widgetManager, appWidgetIds2);
 	    	
 //	    	AppWidgetManager manager = AppWidgetManager.getInstance(context);
 //	    	final int[] appWidgetIds = manager.getAppWidgetIds(new ComponentName(context, MyWidgetProvider.class));
@@ -186,15 +160,26 @@ public class MyWidgetProvider extends AppWidgetProvider {
 		for (int widgetId : appWidgetIds) {
 			
 			//read the info from the shared preference and update it
-			CityTimeZone ctz = WidgetSettingsActivity.loadCtzFromSharedPrefs(context, widgetId);
+//			CityTimeZone ctz = WidgetSettingsActivity.loadCtzFromSharedPrefs(context, widgetId);
+			List<CityTimeZone> ctzs = WidgetSettingsActivity.loadCtzsFromSharedPrefs(context, widgetId);
 			boolean use24Hours = WidgetSettingsActivity.loadUse24HoursFromSharedPRefs(context, widgetId);
-			Log.d(TAG,  " onUpdate: widgetId ::::::::::::::::::::::: " + widgetId + " city : " + (ctz == null ? "null " : ctz.city));
-			updateAppWidget(context, appWidgetManager, widgetId, "", ctz, use24Hours);
+//			Log.d(TAG,  " onUpdate: widgetId ::::::::::::::::::::::: " + widgetId + " city : " + (ctz == null ? "null " : ctz.city));
+//			updateAppWidget(context, appWidgetManager, widgetId, "", ctz, use24Hours);
+			
+			if (ctzs != null) {
+				AppWidgetProviderInfo appInfo = appWidgetManager.getAppWidgetInfo(widgetId);
+				if (appInfo.initialLayout == R.layout.appwidget_layout) {
+					updateAppWidget(context, appWidgetManager, widgetId, "", ctzs.get(0), false);
+				} else if (appInfo.initialLayout == R.layout.widget_4x2_layout) {
+					updateAppWidget(context, appWidgetManager, widgetId, "", ctzs, use24Hours);
+				}
+			}
+			
 		}
 	}
 	
 	
-	static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
+	private static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
             int appWidgetId, String titlePrefix, CityTimeZone ctz, boolean use24Hours) {
 //        Log.d(TAG, "updateAppWidget appWidgetId=" + appWidgetId + " city: " + (ctz == null ? "null" : ctz.city));
 
@@ -238,9 +223,88 @@ public class MyWidgetProvider extends AppWidgetProvider {
 		views.setOnClickPendingIntent(R.id.c_widget_layout, pendingIntent);
         
         // Tell the widget manager
-//		AppWidgetManager.getInstance( context ).updateAppWidget( thisWidget, views );
 		appWidgetManager.updateAppWidget(appWidgetId, views);
     }
+	
+	
+	static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
+            int appWidgetId, String titlePrefix, List<CityTimeZone> ctzs, boolean use24Hours) {
+//        Log.d(TAG, "updateAppWidget appWidgetId=" + appWidgetId + " city: " + (ctz == null ? "null" : ctz.city));
+
+        // Construct the RemoteViews object.  It takes the package name (in our case, it's our
+        // package, but it needs this because on the other side it's the widget host inflating
+        // the layout from our package).
+		RemoteViews views = null;
+		if (ctzs != null) 
+		{
+			AppWidgetProviderInfo appInfo = appWidgetManager.getAppWidgetInfo(appWidgetId);
+			int layout = appInfo.initialLayout;
+			
+			if (layout == R.layout.appwidget_layout) {
+				CityTimeZone ctz = ctzs.get(0);
+				updateAppWidget(context, appWidgetManager, appWidgetId, titlePrefix, ctz, use24Hours);
+				return;
+			} else if (layout == R.layout.widget_4x2_layout) {
+				views = new RemoteViews(context.getPackageName(), R.layout.widget_4x2_layout);
+				String timeFormat = "hh:mm a";
+				 if (use24Hours) {
+				 timeFormat = "HH:mm";
+				 }
+				DateTimeFormatter df = DateTimeFormat.forPattern(timeFormat);
+
+				// update first one
+				CityTimeZone ctz = ctzs.get(0);
+				DateTime dt = new DateTime(DateTimeZone.forID(TimeUtil.getTimeZone(ctz.getTimezoneName())));
+
+				DateTimeFormatter fmt = DateTimeFormat.mediumDate();
+				String mediumDate = fmt.print(dt);
+				fmt = DateTimeFormat.forPattern("EE"); // get day of the week
+				String day = fmt.print(dt);
+
+				/* android.graphics.Color.TRANSPARENT */
+				// views.setInt(R.id.c_widget_layout, "setBackgroundResource",
+				// android.graphics.Color.YELLOW); // this must be set first
+
+				views.setTextViewText(R.id.dateTime1, df.print(dt));
+				views.setTextViewText(R.id.dateCity1, ctz.city);
+
+				// update second one (if exists)
+				if (ctzs.size() > 1) {
+					CityTimeZone ctz2 = ctzs.get(1);
+					DateTime dt2 = new DateTime(DateTimeZone.forID(TimeUtil.getTimeZone(ctz2.getTimezoneName())));
+
+					String mediumDate2 = fmt.print(dt2);
+					DateTimeFormatter fmt2 = DateTimeFormat.forPattern("EE"); // get day of the week
+					String day2 = fmt.print(dt2);
+
+					/* android.graphics.Color.TRANSPARENT */
+					// views.setInt(R.id.c_widget_layout, "setBackgroundResource",
+					// android.graphics.Color.YELLOW); // this must be set first
+
+					views.setTextViewText(R.id.dateTime2, df.print(dt2));
+					views.setTextViewText(R.id.dateCity2, ctz2.city);
+				}
+
+				 ComponentName thisWidget = new ComponentName(context, MyWidgetProvider.class);
+			     // Register an onClickListener
+					Intent intent = new Intent(context, WidgetSettingsActivity.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP );	//need these flags so they don't get reused
+					intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+					
+					intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+
+					//android reuses intents so make sure this intent is unique by providing appWidgetId
+					PendingIntent pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+					
+					views.setOnClickPendingIntent(R.id.c_widget_layout2, pendingIntent);
+			        
+			        // Tell the widget manager
+					appWidgetManager.updateAppWidget(appWidgetId, views);
+			}
+		}
+       
+    }
+
 	
 	public static Bitmap getBackground (int bgcolor)
 	{

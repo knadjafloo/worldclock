@@ -178,12 +178,11 @@ public class MainActivity extends ListActivity {
 
 	@SuppressLint("NewApi")
 	private void clearSearchWidget() {
-		if(Build.VERSION.SDK_INT >= 11) {
-            // Calling twice: first empty text field, second iconify the view
-            searchView.setIconified(true);
-            searchView.setIconified(true);
-        }
-		
+		if (Build.VERSION.SDK_INT >= 11) {
+			// Calling twice: first empty text field, second iconify the view
+			searchView.setIconified(true);
+			searchView.setIconified(true);
+		}
 	}
     /**
      * Called in onCreateView. Override this to provide a custom
@@ -223,51 +222,55 @@ public class MainActivity extends ListActivity {
 	private void updateListPositionPreferences() {
 		SharedPreferences prefs = getSharedPreferences("ListOrderPreference", Context.MODE_PRIVATE);
 
-		if(adapter != null) {
+		if (adapter != null) {
 			// store the order
-			String order = ""; 	
+			String order = "";
 			int count = adapter.getCount();
-			for(int i = 0; i < count - 1; i++) {
-				CityTimeZone ctz = adapter.getItem(i);
-				order += ctz.getId() + ",";
+			if (count > 0) {
+				for (int i = 0; i < count - 1; i++) {
+					CityTimeZone ctz = adapter.getItem(i);
+					order += ctz.getId() + ",";
+				}
+				order += adapter.getItem(count - 1).getId();
+
+				SharedPreferences.Editor ed = prefs.edit();
+				ed.putString("listOrder", order);
+				ed.commit(); // Commiting changes
 			}
-			order += adapter.getItem(count - 1).getId();
-			
-			SharedPreferences.Editor ed = prefs.edit();
-	    	ed.putString("listOrder", order);
-	    	ed.commit();  //Commiting changes
 		}
 	
 	}
-    private void handleIntent(Intent intent) { 
- 	   if (Intent.ACTION_SEARCH.equals(intent.getAction())) { 
- 	      String query = intent.getStringExtra(SearchManager.QUERY);
- 	     Log.d(TAG, " calling Intent.ACTION_SEARCH..!! : " + query);
-// 	      doSearch(query);
- 	     Uri detailUri = intent.getData(); 
-	      String id = detailUri.getLastPathSegment();
-	      //get this item and add it to list
-	      CityTimeZone newCity = db.getCity(id);
-	      if(newCity != null) {
-	    	  adapter.add(newCity);
-	    	  adapter.notifyDataSetChanged();
-	      }
- 	   } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
- 		   Log.d(TAG, " calling Intent.ACTION_VIEW..!!");
- 	      Uri detailUri = intent.getData(); 
- 	      String id = detailUri.getLastPathSegment();
- 	      //get this item and add it to list
- 	      CityTimeZone newCity = db.getCity(id);
- 	      if(newCity != null) {
- 	    	  adapter.add(newCity);
- 	    	  adapter.notifyDataSetChanged();
- 	      }
- 	      
- 	      clearSearchWidget();
- 	      
- 	     updateListPositionPreferences();
- 	   } 
- 	   
- 	} 
+
+	private void handleIntent(Intent intent) {
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			String query = intent.getStringExtra(SearchManager.QUERY);
+			Log.d(TAG, " calling Intent.ACTION_SEARCH..!! : " + query);
+			// doSearch(query);
+			Uri detailUri = intent.getData();
+			if (detailUri != null) {
+				String id = detailUri.getLastPathSegment();
+				// get this item and add it to list
+				CityTimeZone newCity = db.getCity(id);
+				if (newCity != null) {
+					adapter.add(newCity);
+					adapter.notifyDataSetChanged();
+				}
+			}
+		} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+			Log.d(TAG, " calling Intent.ACTION_VIEW..!!");
+			Uri detailUri = intent.getData();
+			String id = detailUri.getLastPathSegment();
+			// get this item and add it to list
+			CityTimeZone newCity = db.getCity(id);
+			if (newCity != null) {
+				adapter.add(newCity);
+				adapter.notifyDataSetChanged();
+			}
+
+			clearSearchWidget();
+
+			updateListPositionPreferences();
+		}
+	}
 
 }

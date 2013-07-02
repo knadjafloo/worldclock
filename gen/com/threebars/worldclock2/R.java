@@ -173,43 +173,54 @@ containing a value of this type.
         public static final int ic_launcher=0x7f020002;
     }
     public static final class id {
-        public static final int Corners=0x7f050018;
-        public static final int c_widget_layout=0x7f050007;
-        public static final int cancel_button=0x7f05000f;
-        public static final int city_name=0x7f05000c;
-        public static final int city_name_help=0x7f05000d;
+        public static final int Corners=0x7f050021;
+        public static final int c_widget_layout=0x7f05000e;
+        public static final int c_widget_layout2=0x7f05001a;
+        public static final int cancel_button=0x7f05000c;
+        public static final int city_name=0x7f050012;
+        public static final int city_name1=0x7f050008;
+        public static final int city_name2=0x7f05000a;
+        public static final int city_name_help=0x7f050009;
         public static final int clickRemove=0x7f050000;
-        public static final int clock=0x7f050015;
-        public static final int country=0x7f050016;
-        public static final int dateCity=0x7f05000a;
-        public static final int dateDate=0x7f050008;
-        public static final int dateTime=0x7f050009;
+        public static final int clock=0x7f050017;
+        public static final int country=0x7f050018;
+        public static final int dateCity=0x7f050011;
+        public static final int dateCity1=0x7f05001c;
+        public static final int dateCity2=0x7f05001f;
+        public static final int dateDate=0x7f05000f;
+        public static final int dateTime=0x7f050010;
+        public static final int dateTime1=0x7f05001d;
+        public static final int dateTime2=0x7f050020;
         public static final int drag_handle=0x7f050005;
         public static final int flingRemove=0x7f050001;
-        public static final int gmt=0x7f050017;
-        public static final int label=0x7f050014;
-        public static final int list_content1=0x7f050011;
-        public static final int list_content2=0x7f050012;
+        public static final int gmt=0x7f050019;
+        public static final int label=0x7f050016;
+        public static final int list_content1=0x7f050013;
+        public static final int list_content2=0x7f050014;
         public static final int list_row=0x7f050006;
-        public static final int menu_search=0x7f050019;
-        public static final int menu_settings=0x7f05001a;
+        public static final int menu_search=0x7f050022;
+        public static final int menu_settings=0x7f050023;
         public static final int onDown=0x7f050002;
         public static final int onLongPress=0x7f050004;
         public static final int onMove=0x7f050003;
-        public static final int save_button=0x7f050010;
-        public static final int separator=0x7f05000b;
-        public static final int topPart=0x7f050013;
-        public static final int use_24hours=0x7f05000e;
+        public static final int row1=0x7f05001b;
+        public static final int row2=0x7f05001e;
+        public static final int save_button=0x7f05000d;
+        public static final int separator=0x7f050007;
+        public static final int topPart=0x7f050015;
+        public static final int use_24hours=0x7f05000b;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
-        public static final int appwidget_layout=0x7f030001;
-        public static final int clock_app_widget_info=0x7f030002;
-        public static final int configure_layout=0x7f030003;
-        public static final int filterable_listview=0x7f030004;
-        public static final int header=0x7f030005;
-        public static final int my_list_item=0x7f030006;
-        public static final int row2=0x7f030007;
+        public static final int activity_main_setting=0x7f030001;
+        public static final int appwidget_layout=0x7f030002;
+        public static final int clock_app_widget_info=0x7f030003;
+        public static final int configure_layout=0x7f030004;
+        public static final int filterable_listview=0x7f030005;
+        public static final int header=0x7f030006;
+        public static final int my_list_item=0x7f030007;
+        public static final int row2=0x7f030008;
+        public static final int widget_4x2_layout=0x7f030009;
     }
     public static final class menu {
         public static final int main_menu=0x7f080000;
@@ -225,6 +236,7 @@ containing a value of this type.
         public static final int display_seconds=0x7f060009;
         public static final int hello=0x7f060000;
         public static final int loading=0x7f060012;
+        public static final int medium_widget_name=0x7f060013;
         public static final int menu_settings=0x7f060005;
         public static final int save=0x7f06000d;
         public static final int search=0x7f060002;
@@ -232,6 +244,7 @@ containing a value of this type.
         public static final int select_city=0x7f060011;
         public static final int select_city_desc=0x7f06000f;
         public static final int show_second_ticker=0x7f060006;
+        public static final int small_widget_name=0x7f060014;
         public static final int time_display_preferences=0x7f060007;
         public static final int use_24hour_clock=0x7f06000b;
     }
@@ -264,9 +277,11 @@ containing a value of this type.
         public static final int AppTheme=0x7f070001;
     }
     public static final class xml {
-        public static final int preferences=0x7f040000;
-        public static final int searchable=0x7f040001;
-        public static final int widget_preferences=0x7f040002;
+        public static final int clock_app_widget_4x2_info=0x7f040000;
+        public static final int clock_app_widget_info=0x7f040001;
+        public static final int preferences=0x7f040002;
+        public static final int searchable=0x7f040003;
+        public static final int widget_preferences=0x7f040004;
     }
     public static final class styleable {
         /** Attributes that can be used with a DragSortListView.
