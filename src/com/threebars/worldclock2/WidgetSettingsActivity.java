@@ -3,25 +3,32 @@ package com.threebars.worldclock2;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.margaritov.preference.colorpicker.AlphaPatternDrawable;
+import net.margaritov.preference.colorpicker.ColorPickerDialog;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class WidgetSettingsActivity extends Activity {
+public class WidgetSettingsActivity extends Activity implements ColorPickerDialog.OnColorChangedListener {
 
 	private static final String IDS_ARRAY_STR = "ids";
 	private static final String USE24_HOURS = "use24Hours";
+	private static final String BACKGROUND_COLOR = "background";
 	private final static String TAG = "WidgetSettingsActivity";
 	public static final int SEARCH_CODE = 1;
 	private TextView cityName;
@@ -33,6 +40,13 @@ public class WidgetSettingsActivity extends Activity {
 	private CityTimeZone city2TimeZone;
 	private List<CityTimeZone> cityTimeZones;
 	private boolean is_large_widget;
+	
+	private ImageView previewImgView;
+	private int mValue = Color.BLACK;
+	private float mDensity = 0;
+	private boolean mAlphaSliderEnabled = false;
+	private boolean mHexValueEnabled = false;
+	ColorPickerDialog mDialog;
 	
 	private Button saveButton;
 	private Button cancelButton;
@@ -47,6 +61,7 @@ public class WidgetSettingsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
 
+		mDensity = this.getResources().getDisplayMetrics().density;
 		// Find the widget id from the intent.
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
@@ -62,6 +77,8 @@ public class WidgetSettingsActivity extends Activity {
 		
 		cityTimeZones = loadCtzsFromSharedPrefs(this, mAppWidgetId);
 		cityTimeZone = cityTimeZones != null && cityTimeZones.size() > 0 ? cityTimeZones.get(0) : null;
+		
+		mValue = loadWidgetBackgroundColor(this, mAppWidgetId);
 		
 		setResult(RESULT_CANCELED);
 		
@@ -88,6 +105,7 @@ public class WidgetSettingsActivity extends Activity {
 			else {
 				cityName.setText("Tap to configure the widget");
 			}
+			
 			
 		} else if (appInfo.initialLayout == R.layout.widget_4x2_layout) {
 			is_large_widget = true;
@@ -134,6 +152,29 @@ public class WidgetSettingsActivity extends Activity {
 			else {
 				city2Name.setText("Tap to configure the widget");
 			}
+		}
+		
+		previewImgView = (ImageView)findViewById(R.id.previewImg);
+		previewImgView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+					mDialog = new ColorPickerDialog(WidgetSettingsActivity.this, R.integer.COLOR_BLACK);
+					mDialog.setOnColorChangedListener(WidgetSettingsActivity.this);
+					if (mAlphaSliderEnabled) {
+						mDialog.setAlphaSliderVisible(true);
+					}
+					if (mHexValueEnabled) {
+						mDialog.setHexValueEnabled(true);
+					}
+					mDialog.show();
+									
+			}
+		});
+		
+		if (mValue != Color.BLACK) {
+			setPreviewColor();
 		}
 		
 		use24CheckBox = (CheckBox)findViewById(R.id.use_24hours);
@@ -230,7 +271,7 @@ public class WidgetSettingsActivity extends Activity {
     	
     }
     
-    public static void saveCtzsToSharedPRefs(Context context, int appWidgetId, List<CityTimeZone> ctzs, boolean use24Hours)
+    public static void saveCtzsToSharedPRefs(Context context, int appWidgetId, List<CityTimeZone> ctzs, boolean use24Hours, int color)
     {
     	SharedPreferences prefs = context.getSharedPreferences(appWidgetId + PREF_PREFIX_KEY, 0);
     	String ids = "";
@@ -240,6 +281,7 @@ public class WidgetSettingsActivity extends Activity {
     	ids += ctzs.get(ctzs.size() - 1).id;
     	prefs.edit().putString(IDS_ARRAY_STR, ids).commit();
     	prefs.edit().putBoolean(USE24_HOURS, use24Hours).commit();
+    	prefs.edit().putInt(BACKGROUND_COLOR, color).commit();
     	
     }
     
@@ -253,6 +295,11 @@ public class WidgetSettingsActivity extends Activity {
     		return db.getCitiesById(ids);
     	}
     	return null;
+    }
+    
+    public static int loadWidgetBackgroundColor(Context context, int appWidgetId) {
+    	SharedPreferences prefs = context.getSharedPreferences(appWidgetId + PREF_PREFIX_KEY, 0);
+    	return prefs.getInt(BACKGROUND_COLOR, Color.BLACK);
     }
     
     
@@ -276,7 +323,7 @@ public class WidgetSettingsActivity extends Activity {
 					{
 						cityTimeZones.add(city1TimeZone);
 						cityTimeZones.add(city2TimeZone);
-						saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked());
+						saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked(), mValue);
 					}	
 				}
 				else
@@ -292,7 +339,7 @@ public class WidgetSettingsActivity extends Activity {
 				if(mAppWidgetId > 0)
 				{
 					cityTimeZones.add(cityTimeZone);
-					saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked());
+					saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked(), mValue);
 				}
 			}
 			else {
@@ -304,7 +351,7 @@ public class WidgetSettingsActivity extends Activity {
 			// Push widget update to surface with newly set prefix
 			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 //			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZone, use24CheckBox.isChecked());
-			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZones, use24CheckBox.isChecked());
+			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZones, use24CheckBox.isChecked(), mValue);
 			
 			// Make sure we pass back the original appWidgetId
 			Intent resultValue = new Intent();
@@ -322,5 +369,59 @@ public class WidgetSettingsActivity extends Activity {
 			finish();
 		}
 	};
+	
+	
 
+	@Override
+	public void onColorChanged(int color) {
+		// TODO Auto-generated method stub
+		
+		mValue = color;
+		setPreviewColor();
+	}
+	
+	private void setPreviewColor() {
+		
+		previewImgView.setBackgroundDrawable(new AlphaPatternDrawable((int)(5 * mDensity)));
+		previewImgView.setImageBitmap(getPreviewBitmap());
+	}
+	
+	private Bitmap getPreviewBitmap() {
+		int d = (int) (mDensity * 31); //30dip
+		int color = mValue;
+		Bitmap bm = Bitmap.createBitmap(d, d, Config.ARGB_8888);
+		Log.d(TAG, "1111111111111height : " + d );
+		int w = bm.getWidth();
+		int h = bm.getHeight();
+		int c = color;
+		for (int i = 0; i < w; i++) {
+			for (int j = i; j < h; j++) {
+				c = (i <= 1 || j <= 1 || i >= w-2 || j >= h-2) ? Color.GRAY : color;
+				bm.setPixel(i, j, c);
+				if (i != j) {
+					bm.setPixel(j, i, c);
+				}
+			}
+		}
+
+		return bm;
+	}
+	
+
+    protected void showDialog(Bundle state) {
+		mDialog = new ColorPickerDialog(this, mValue);
+		mDialog.setOnColorChangedListener(this);
+		if (mAlphaSliderEnabled) {
+			mDialog.setAlphaSliderVisible(true);
+		}
+		if (mHexValueEnabled) {
+			mDialog.setHexValueEnabled(true);
+		}
+		if (state != null) {
+			mDialog.onRestoreInstanceState(state);
+		}
+		mDialog.show();
+	}
+	
+	
 }

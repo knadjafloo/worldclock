@@ -18,7 +18,7 @@
     
 <!-- City/Timezone -->
     <TextView
-        android:id="@+id/city_name"
+        android:id="@+id/city_name1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dip"
@@ -47,6 +47,36 @@
         android:textColor="#808080"
         android:textSize="13sp" />
     
+    
+        <TextView
+        android:id="@+id/city_name2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dip"
+        android:clickable="true"
+        
+        android:longClickable="false"
+        android:paddingBottom="1dip"
+        android:paddingTop="1dip"
+        android:text="@string/select_city"
+        
+        android:textSize="17sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/city_name_help"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dip"
+        android:clickable="false"
+        android:gravity="center"
+        android:linksClickable="false"
+        android:longClickable="false"
+        android:paddingBottom="1dip"
+        android:paddingTop="1dip"
+        android:text="@string/select_city_desc"
+        android:textColor="#808080"
+        android:textSize="13sp" />
         
 <!-- Clock Configure Header -->
     <TextView
@@ -64,10 +94,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/use_24hour_clock" />
-    
-
-	
-
 <!--
     <TextView
         android:id="@+id/label1"
@@ -82,8 +108,8 @@
         android:layout_height="wrap_content" 
         android:layout_margin="5dp"/>
  -->
-
-    <RelativeLayout
+ 
+     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp" >
@@ -110,7 +136,6 @@
             android:gravity="center_vertical"
             android:src="@drawable/background" />
     </RelativeLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" 

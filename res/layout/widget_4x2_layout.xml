@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/c_widget_layout2"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background"
+    android:orientation="vertical" >
+    <LinearLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" 
+        android:layout_weight="1"  
+        android:layout_marginRight="5dip"
+        android:id="@+id/row1">
+       <TextView
+        android:id="@+id/dateCity1"
+        style="@android:style/TextAppearance.Small"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight=".5"
+        android:layout_gravity="center_vertical"
+        android:gravity="left"
+        android:layout_margin="4dip"
+        android:text="city" />
+        <TextView
+        android:id="@+id/dateTime1"
+        style="@android:style/TextAppearance.Large"
+        android:textStyle="bold"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight=".5"
+        android:layout_gravity="center_vertical"
+        android:gravity="right"
+        android:text="@string/loading" />
+    
+    </LinearLayout>
+    <LinearLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" 
+        android:layout_marginRight="5dip"
+        android:layout_weight="1"  
+        android:id="@+id/row2">
+        <TextView
+        android:id="@+id/dateCity2"
+        style="@android:style/TextAppearance.Small"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight=".5"  
+        android:gravity="left"
+        android:layout_margin="4dip"
+        android:text="city" />
+        <TextView
+        android:id="@+id/dateTime2"
+        style="@android:style/TextAppearance.Large"
+        android:textStyle="bold"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight=".5"
+        android:layout_gravity="center_vertical"
+        android:gravity="right"
+        android:text="@string/loading" />
+    </LinearLayout>
+</LinearLayout>
