@@ -29,6 +29,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 	private static final String IDS_ARRAY_STR = "ids";
 	private static final String USE24_HOURS = "use24Hours";
 	private static final String BACKGROUND_COLOR = "background";
+	private static final String TEXT_COLOR = "textColor";
 	private final static String TAG = "WidgetSettingsActivity";
 	public static final int SEARCH_CODE = 1;
 	private TextView cityName;
@@ -42,11 +43,14 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 	private boolean is_large_widget;
 	
 	private ImageView previewImgView;
-	private int mValue = Color.BLACK;
+	private int mValue = R.integer.COLOR_BLACK;
+	private ImageView previewTextColorView;
+	private int mTextColor = R.integer.COLOR_GREEN;
 	private float mDensity = 0;
 	private boolean mAlphaSliderEnabled = false;
 	private boolean mHexValueEnabled = false;
 	ColorPickerDialog mDialog;
+	ColorPickerDialog mDialog2;
 	
 	private Button saveButton;
 	private Button cancelButton;
@@ -79,6 +83,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 		cityTimeZone = cityTimeZones != null && cityTimeZones.size() > 0 ? cityTimeZones.get(0) : null;
 		
 		mValue = loadWidgetBackgroundColor(this, mAppWidgetId);
+		mTextColor = loadWidgetTextColor(this, mAppWidgetId);
 		
 		setResult(RESULT_CANCELED);
 		
@@ -161,6 +166,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 			public void onClick(View v) {
 				
 					mDialog = new ColorPickerDialog(WidgetSettingsActivity.this, R.integer.COLOR_BLACK);
+					mDialog.setType(BACKGROUND_COLOR);
 					mDialog.setOnColorChangedListener(WidgetSettingsActivity.this);
 					if (mAlphaSliderEnabled) {
 						mDialog.setAlphaSliderVisible(true);
@@ -172,9 +178,37 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 									
 			}
 		});
+//		
+//		if (mValue != Color.BLACK) {
+//			setPreviewColor();
+//		}
 		
-		if (mValue != Color.BLACK) {
-			setPreviewColor();
+		if (mValue != R.integer.COLOR_BLACK) {
+			setPreviewColor(BACKGROUND_COLOR);
+		}
+		previewTextColorView = (ImageView)findViewById(R.id.previewImgText);
+		previewTextColorView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+					mDialog2 = new ColorPickerDialog(WidgetSettingsActivity.this, R.integer.COLOR_GREEN);
+					mDialog2.setType(TEXT_COLOR);
+					mDialog2.setOnColorChangedListener(WidgetSettingsActivity.this);
+					if (mAlphaSliderEnabled) {
+						mDialog2.setAlphaSliderVisible(true);
+					}
+					if (mHexValueEnabled) {
+						mDialog2.setHexValueEnabled(true);
+					}
+					mDialog2.show();
+									
+			}
+		});
+		
+		
+		if (mTextColor != R.integer.COLOR_GREEN) {
+			setPreviewColor(TEXT_COLOR);
 		}
 		
 		use24CheckBox = (CheckBox)findViewById(R.id.use_24hours);
@@ -271,7 +305,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
     	
     }
     
-    public static void saveCtzsToSharedPRefs(Context context, int appWidgetId, List<CityTimeZone> ctzs, boolean use24Hours, int color)
+    public static void saveCtzsToSharedPRefs(Context context, int appWidgetId, List<CityTimeZone> ctzs, boolean use24Hours, int color, int textColor)
     {
     	SharedPreferences prefs = context.getSharedPreferences(appWidgetId + PREF_PREFIX_KEY, 0);
     	String ids = "";
@@ -282,6 +316,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
     	prefs.edit().putString(IDS_ARRAY_STR, ids).commit();
     	prefs.edit().putBoolean(USE24_HOURS, use24Hours).commit();
     	prefs.edit().putInt(BACKGROUND_COLOR, color).commit();
+    	prefs.edit().putInt(TEXT_COLOR, textColor).commit();
     	
     }
     
@@ -299,9 +334,13 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
     
     public static int loadWidgetBackgroundColor(Context context, int appWidgetId) {
     	SharedPreferences prefs = context.getSharedPreferences(appWidgetId + PREF_PREFIX_KEY, 0);
-    	return prefs.getInt(BACKGROUND_COLOR, Color.BLACK);
+    	return prefs.getInt(BACKGROUND_COLOR, R.integer.COLOR_BLACK);
     }
     
+    public static int loadWidgetTextColor(Context context, int appWidgetId) {
+    	SharedPreferences prefs = context.getSharedPreferences(appWidgetId + PREF_PREFIX_KEY, 0);
+    	return prefs.getInt(TEXT_COLOR, R.integer.COLOR_GREEN);
+    }
     
 	private View.OnClickListener saveClickListener = new View.OnClickListener() {
 
@@ -323,7 +362,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 					{
 						cityTimeZones.add(city1TimeZone);
 						cityTimeZones.add(city2TimeZone);
-						saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked(), mValue);
+						saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked(), mValue, mTextColor);
 					}	
 				}
 				else
@@ -339,7 +378,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 				if(mAppWidgetId > 0)
 				{
 					cityTimeZones.add(cityTimeZone);
-					saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked(), mValue);
+					saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked(), mValue, mTextColor);
 				}
 			}
 			else {
@@ -351,7 +390,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 			// Push widget update to surface with newly set prefix
 			AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 //			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZone, use24CheckBox.isChecked());
-			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZones, use24CheckBox.isChecked(), mValue);
+			MyWidgetProvider.updateAppWidget(context, appWidgetManager, mAppWidgetId, PREF_PREFIX_KEY, cityTimeZones/*, use24CheckBox.isChecked(), mValue*/);
 			
 			// Make sure we pass back the original appWidgetId
 			Intent resultValue = new Intent();
@@ -373,24 +412,35 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 	
 
 	@Override
-	public void onColorChanged(int color) {
+	public void onColorChanged(int color, String type) {
 		// TODO Auto-generated method stub
+		if(TEXT_COLOR.equals(type)) {
+			mTextColor = color;
+			setPreviewColor(TEXT_COLOR);
+		}
+		else {
+			mValue = color;
+			setPreviewColor(BACKGROUND_COLOR);	
+		}
 		
-		mValue = color;
-		setPreviewColor();
 	}
 	
-	private void setPreviewColor() {
+	private void setPreviewColor(String type) {
 		
-		previewImgView.setBackgroundDrawable(new AlphaPatternDrawable((int)(5 * mDensity)));
-		previewImgView.setImageBitmap(getPreviewBitmap());
+		if (BACKGROUND_COLOR.equals(type)) {
+			previewImgView.setBackgroundDrawable(new AlphaPatternDrawable((int) (5 * mDensity)));
+			previewImgView.setImageBitmap(getPreviewBitmap(mValue));
+		}
+
+		else if (TEXT_COLOR.equals(type)) {
+			previewTextColorView.setBackgroundDrawable(new AlphaPatternDrawable((int) (5 * mDensity)));
+			previewTextColorView.setImageBitmap(getPreviewBitmap(mTextColor));
+		}
 	}
 	
-	private Bitmap getPreviewBitmap() {
+	private Bitmap getPreviewBitmap(int color) {
 		int d = (int) (mDensity * 31); //30dip
-		int color = mValue;
 		Bitmap bm = Bitmap.createBitmap(d, d, Config.ARGB_8888);
-		Log.d(TAG, "1111111111111height : " + d );
 		int w = bm.getWidth();
 		int h = bm.getHeight();
 		int c = color;

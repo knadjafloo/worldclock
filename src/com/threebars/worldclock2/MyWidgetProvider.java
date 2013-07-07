@@ -162,17 +162,16 @@ public class MyWidgetProvider extends AppWidgetProvider {
 			//read the info from the shared preference and update it
 //			CityTimeZone ctz = WidgetSettingsActivity.loadCtzFromSharedPrefs(context, widgetId);
 			List<CityTimeZone> ctzs = WidgetSettingsActivity.loadCtzsFromSharedPrefs(context, widgetId);
-			boolean use24Hours = WidgetSettingsActivity.loadUse24HoursFromSharedPRefs(context, widgetId);
-			int backgroundColor = WidgetSettingsActivity.loadWidgetBackgroundColor(context, widgetId);
+			
 //			Log.d(TAG,  " onUpdate: widgetId ::::::::::::::::::::::: " + widgetId + " city : " + (ctz == null ? "null " : ctz.city));
 //			updateAppWidget(context, appWidgetManager, widgetId, "", ctz, use24Hours);
 			
 			if (ctzs != null) {
 				AppWidgetProviderInfo appInfo = appWidgetManager.getAppWidgetInfo(widgetId);
 				if (appInfo.initialLayout == R.layout.appwidget_layout) {
-					updateAppWidget(context, appWidgetManager, widgetId, "", ctzs.get(0), false, backgroundColor);
+					updateAppWidget(context, appWidgetManager, widgetId, "", ctzs.get(0));
 				} else if (appInfo.initialLayout == R.layout.widget_4x2_layout) {
-					updateAppWidget(context, appWidgetManager, widgetId, "", ctzs, use24Hours, backgroundColor);
+					updateAppWidget(context, appWidgetManager, widgetId, "", ctzs);
 				}
 			}
 			
@@ -181,9 +180,12 @@ public class MyWidgetProvider extends AppWidgetProvider {
 	
 	
 	private static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-            int appWidgetId, String titlePrefix, CityTimeZone ctz, boolean use24Hours, int bgColor) {
+            int appWidgetId, String titlePrefix, CityTimeZone ctz) {
 //        Log.d(TAG, "updateAppWidget appWidgetId=" + appWidgetId + " city: " + (ctz == null ? "null" : ctz.city));
 
+		boolean use24Hours = WidgetSettingsActivity.loadUse24HoursFromSharedPRefs(context, appWidgetId);
+		int backgroundColor = WidgetSettingsActivity.loadWidgetBackgroundColor(context, appWidgetId);
+		int textColor = WidgetSettingsActivity.loadWidgetTextColor(context, appWidgetId);
         // Construct the RemoteViews object.  It takes the package name (in our case, it's our
         // package, but it needs this because on the other side it's the widget host inflating
         // the layout from our package).
@@ -209,9 +211,11 @@ public class MyWidgetProvider extends AppWidgetProvider {
 			views.setTextViewText(R.id.dateTime, df.print(dt));
 			views.setTextViewText(R.id.dateCity, ctz.city);
 			
-			if (bgColor != Color.BLACK) {
-				views.setInt(R.id.c_widget_layout, "setBackgroundColor", bgColor);
+			if (backgroundColor != Color.BLACK) {
+				views.setInt(R.id.c_widget_layout, "setBackgroundColor", backgroundColor);
 			}
+			
+			views.setTextColor(R.id.dateTime, textColor);
 
 		}
         ComponentName thisWidget = new ComponentName(context, MyWidgetProvider.class);
@@ -233,9 +237,13 @@ public class MyWidgetProvider extends AppWidgetProvider {
 	
 	
 	static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-            int appWidgetId, String titlePrefix, List<CityTimeZone> ctzs, boolean use24Hours, int bgColor) {
+            int appWidgetId, String titlePrefix, List<CityTimeZone> ctzs) {
 //        Log.d(TAG, "updateAppWidget appWidgetId=" + appWidgetId + " city: " + (ctz == null ? "null" : ctz.city));
 
+		boolean use24Hours = WidgetSettingsActivity.loadUse24HoursFromSharedPRefs(context, appWidgetId);
+		int backgroundColor = WidgetSettingsActivity.loadWidgetBackgroundColor(context, appWidgetId);
+		int textColor = WidgetSettingsActivity.loadWidgetTextColor(context, appWidgetId);
+		
         // Construct the RemoteViews object.  It takes the package name (in our case, it's our
         // package, but it needs this because on the other side it's the widget host inflating
         // the layout from our package).
@@ -247,7 +255,7 @@ public class MyWidgetProvider extends AppWidgetProvider {
 			
 			if (layout == R.layout.appwidget_layout) {
 				CityTimeZone ctz = ctzs.get(0);
-				updateAppWidget(context, appWidgetManager, appWidgetId, titlePrefix, ctz, use24Hours, bgColor);
+				updateAppWidget(context, appWidgetManager, appWidgetId, titlePrefix, ctz);
 				return;
 			} else if (layout == R.layout.widget_4x2_layout) {
 				views = new RemoteViews(context.getPackageName(), R.layout.widget_4x2_layout);
@@ -272,9 +280,11 @@ public class MyWidgetProvider extends AppWidgetProvider {
 
 				views.setTextViewText(R.id.dateTime1, df.print(dt));
 				views.setTextViewText(R.id.dateCity1, ctz.city);
-				if (bgColor != Color.BLACK) {
-					views.setInt(R.id.c_widget_layout2, "setBackgroundColor", bgColor);
+				if (backgroundColor != Color.BLACK) {
+					views.setInt(R.id.c_widget_layout2, "setBackgroundColor", backgroundColor);
 				}
+				views.setTextColor(R.id.dateTime1, textColor);
+				views.setTextColor(R.id.dateTime2, textColor);
 				// update second one (if exists)
 				if (ctzs.size() > 1) {
 					CityTimeZone ctz2 = ctzs.get(1);

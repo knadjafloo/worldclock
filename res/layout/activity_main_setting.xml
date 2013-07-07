@@ -21,9 +21,8 @@
         android:id="@+id/city_name1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dip"
         android:clickable="true"
-        
+        android:padding="10dp"
         android:longClickable="false"
         android:paddingBottom="1dip"
         android:paddingTop="1dip"
@@ -52,12 +51,10 @@
         android:id="@+id/city_name2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dip"
         android:clickable="true"
         
         android:longClickable="false"
-        android:paddingBottom="1dip"
-        android:paddingTop="1dip"
+        android:padding="10dp"
         android:text="@string/select_city"
         
         android:textSize="17sp"
@@ -136,6 +133,36 @@
             android:gravity="center_vertical"
             android:src="@drawable/background" />
     </RelativeLayout>
+    
+        <!-- clock text color -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp" >
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"
+            android:gravity="center_vertical"
+            android:text="Clock Text Color"
+            android:textSize="17sp" />
+
+        <ImageView
+            android:id="@+id/previewImgText"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:layout_marginRight="15dp"
+            android:contentDescription="background"
+            android:gravity="center_vertical"
+            android:src="@android:color/background_light" />
+    </RelativeLayout> 
+     
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" 
