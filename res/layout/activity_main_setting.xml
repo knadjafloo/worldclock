@@ -163,6 +163,33 @@
             android:src="@android:color/background_light" />
     </RelativeLayout> 
      
+        <LinearLayout
+        android:id="@+id/row1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dip"
+        android:orientation="horizontal" >
+
+       <TextView
+        style="@android:style/TextAppearance.Small"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight=".5"
+        android:gravity="left"
+        android:layout_margin="4dip"
+        android:textSize="17sp"
+        android:text="Font" />
+        <TextView
+        android:id="@+id/fontType"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight=".5"
+        android:layout_gravity="center_vertical"
+        android:gravity="right"
+        android:layout_marginRight="15dp"
+        android:text="Default" />
+    
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" 

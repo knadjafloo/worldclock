@@ -26,8 +26,8 @@
 	
 	<string name="loading">Loading&#8230;</string>
 	
-	<string name="medium_widget_name">WorldClock 2x</string>
-	<string name="small_widget_name">WorldClock 1x</string>
+	<string name="medium_widget_name">WorldClock Two Cities</string>
+	<string name="small_widget_name">WorldClock One City</string>
 	
 
 	    <!-- Color Picker -->

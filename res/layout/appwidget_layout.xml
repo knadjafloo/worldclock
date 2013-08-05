@@ -3,40 +3,40 @@
     android:id="@+id/c_widget_layout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:layout_margin="8dip"
+    android:weightSum="1"
+    
+    
     android:background="@drawable/background"
-    android:gravity="fill_horizontal|center_vertical"
     android:orientation="vertical" >
     
-    <TextView
+    <ImageView
         android:id="@+id/dateDate"
-        style="@android:style/TextAppearance.Small"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="4dip"
-        android:gravity="center_horizontal"
-        android:text="" >
-    </TextView>
-    <TextView
+        
+        android:layout_gravity="top"
+        android:scaleType="center"
+        android:layout_weight=".12"
+         >
+    </ImageView>
+    <ImageView
         android:id="@+id/dateTime"
-        style="@android:style/TextAppearance.Large"
-        android:textStyle="bold"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center_horizontal"
+        
+        android:layout_weight=".76"
+        android:scaleType="center"
         android:text="@string/loading" >
-    </TextView>
-    <TextView
+    </ImageView>
+
+    <ImageView
         android:id="@+id/dateCity"
-        style="@android:style/TextAppearance.Small"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center_horizontal"
-        android:layout_marginBottom="4dip"
+        android:layout_gravity="bottom"
+        android:layout_weight=".12"
         android:text="" >
-    </TextView>
+
+    </ImageView>
 
 </LinearLayout> 

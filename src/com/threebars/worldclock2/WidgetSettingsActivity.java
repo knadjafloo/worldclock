@@ -1,26 +1,42 @@
 package com.threebars.worldclock2;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.margaritov.preference.colorpicker.AlphaPatternDrawable;
 import net.margaritov.preference.colorpicker.ColorPickerDialog;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+
 import android.app.Activity;
+import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +46,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 	private static final String USE24_HOURS = "use24Hours";
 	private static final String BACKGROUND_COLOR = "background";
 	private static final String TEXT_COLOR = "textColor";
+	private static final String FONT = "font";
 	private final static String TAG = "WidgetSettingsActivity";
 	public static final int SEARCH_CODE = 1;
 	private TextView cityName;
@@ -45,15 +62,21 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 	private ImageView previewImgView;
 	private int mValue = R.integer.COLOR_BLACK;
 	private ImageView previewTextColorView;
-	private int mTextColor = R.integer.COLOR_GREEN;
+	private TextView fontView;
+	private int mTextColor = Color.LTGRAY;
 	private float mDensity = 0;
+	private FontItem mFontItem = null;
 	private boolean mAlphaSliderEnabled = false;
 	private boolean mHexValueEnabled = false;
 	ColorPickerDialog mDialog;
 	ColorPickerDialog mDialog2;
+	Dialog mFontDialog;
 	
 	private Button saveButton;
 	private Button cancelButton;
+	
+	private ListView mFontListView;
+	private ArrayList<FontItem> fontsList;
 	
 //	public static final String PREF_PREFIX_KEY = "wc_widget_";
 	public static final String PREF_PREFIX_KEY =  "ListOrderPreference";
@@ -84,6 +107,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 		
 		mValue = loadWidgetBackgroundColor(this, mAppWidgetId);
 		mTextColor = loadWidgetTextColor(this, mAppWidgetId);
+		mFontItem = loadWidgetTextFont(this, mAppWidgetId);
 		
 		setResult(RESULT_CANCELED);
 		
@@ -110,6 +134,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 			else {
 				cityName.setText("Tap to configure the widget");
 			}
+			
 			
 			
 		} else if (appInfo.initialLayout == R.layout.widget_4x2_layout) {
@@ -159,6 +184,16 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 			}
 		}
 		
+		fontView = (TextView)findViewById(R.id.fontType);
+		fontView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				showFontPopUp();
+			}
+		});
+		
+		
 		previewImgView = (ImageView)findViewById(R.id.previewImg);
 		previewImgView.setOnClickListener(new OnClickListener() {
 			
@@ -178,10 +213,6 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 									
 			}
 		});
-//		
-//		if (mValue != Color.BLACK) {
-//			setPreviewColor();
-//		}
 		
 		if (mValue != R.integer.COLOR_BLACK) {
 			setPreviewColor(BACKGROUND_COLOR);
@@ -192,7 +223,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 			@Override
 			public void onClick(View v) {
 				
-					mDialog2 = new ColorPickerDialog(WidgetSettingsActivity.this, R.integer.COLOR_GREEN);
+					mDialog2 = new ColorPickerDialog(WidgetSettingsActivity.this, Color.LTGRAY);
 					mDialog2.setType(TEXT_COLOR);
 					mDialog2.setOnColorChangedListener(WidgetSettingsActivity.this);
 					if (mAlphaSliderEnabled) {
@@ -207,13 +238,14 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 		});
 		
 		
-		if (mTextColor != R.integer.COLOR_GREEN) {
 			setPreviewColor(TEXT_COLOR);
-		}
 		
 		use24CheckBox = (CheckBox)findViewById(R.id.use_24hours);
 		use24CheckBox.setChecked(loadUse24HoursFromSharedPRefs(this, mAppWidgetId));		
 		
+		if(mFontItem != null) {
+			setFontItem(mFontItem);
+		}
 		
 		
 		saveButton = (Button) findViewById(R.id.save_button);
@@ -222,6 +254,93 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 		saveButton.setOnClickListener(saveClickListener);
 		cancelButton.setOnClickListener(cancelClickListener);
 	}
+	
+	private void showFontPopUp() {
+		fontsList = new ArrayList<FontItem>();
+
+		AssetManager assetManager = getAssets();
+		// To get names of all files inside the "Fonts" folder
+		try {
+			String[] files = assetManager.list("fonts");
+			String timeFormat = "hh:mm a";
+
+			DateTimeFormatter df = DateTimeFormat.forPattern(timeFormat);
+			String currentTime = "Sample " + df.print(new DateTime());
+			for (int i = 0; i < files.length; i++) {
+				FontItem item = new FontItem();
+				item.fileName = files[i];
+				item.displayValue = currentTime;
+				fontsList.add(item);
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+
+		if (mFontDialog == null) {
+			mFontDialog = new Dialog(this);
+			mFontDialog.setContentView(R.layout.font_list_layout);
+			final ArrayAdapter<FontItem> adapter = new FontArrayAdapter(this, fontsList);
+			mFontListView = (ListView) mFontDialog.findViewById(R.id.font_list);
+			mFontListView.setAdapter(adapter);
+			mFontListView.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+					mFontItem = adapter.getItem(position);
+					setFontItem(mFontItem);
+					mFontDialog.dismiss();
+				}
+
+			});
+		}
+		mFontDialog.setCancelable(true);
+		mFontDialog.setTitle("Fonts");
+		mFontDialog.show();
+
+	}
+	
+	private void setFontItem(FontItem mFontItem) {
+		fontView.setText(mFontItem.displayValue);
+		Typeface face=Typeface.createFromAsset(getAssets(), "fonts/" + mFontItem.fileName); 
+		fontView.setTypeface(face);
+	}
+	
+	public static class FontItem {
+		
+		public FontItem() {
+			
+		}
+		
+		String fileName;
+		String displayValue;
+	}
+	
+	private class FontArrayAdapter extends ArrayAdapter<FontItem> {
+		  private final Context context;
+		  private final List<FontItem> values;
+
+		  public FontArrayAdapter(Context context, List<FontItem> values) {
+		    super(context, R.layout.font_list_layout, values);
+		    this.context = context;
+		    this.values = values;
+		  }
+
+		  @Override
+		  public View getView(int position, View convertView, ViewGroup parent) {
+		    LayoutInflater inflater = (LayoutInflater) context
+		        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		    View rowView = inflater.inflate(R.layout.font_list_item, parent, false);
+		    TextView textView = (TextView) rowView.findViewById(R.id.fontItem);
+		    FontItem font = values.get(position);
+		    textView.setText(font.displayValue);
+		    
+		    Typeface face=Typeface.createFromAsset(getAssets(), "fonts/" + font.fileName); 
+		    textView.setTypeface(face); 
+		    return rowView;
+		  }
+		} 
+
+
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -305,7 +424,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
     	
     }
     
-    public static void saveCtzsToSharedPRefs(Context context, int appWidgetId, List<CityTimeZone> ctzs, boolean use24Hours, int color, int textColor)
+    public static void saveCtzsToSharedPRefs(Context context, int appWidgetId, List<CityTimeZone> ctzs, boolean use24Hours, int color, int textColor, FontItem fontItem)
     {
     	SharedPreferences prefs = context.getSharedPreferences(appWidgetId + PREF_PREFIX_KEY, 0);
     	String ids = "";
@@ -317,6 +436,9 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
     	prefs.edit().putBoolean(USE24_HOURS, use24Hours).commit();
     	prefs.edit().putInt(BACKGROUND_COLOR, color).commit();
     	prefs.edit().putInt(TEXT_COLOR, textColor).commit();
+    	if(fontItem != null) {
+    		prefs.edit().putString(FONT, fontItem.fileName).commit();
+    	}
     	
     }
     
@@ -327,7 +449,9 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
     	if(ids != null && ids.length() > 0)
     	{
     		CitiesDatabase db = new CitiesDatabase(context);
-    		return db.getCitiesById(ids);
+    		List<CityTimeZone> cities = db.getCitiesById(ids);
+    		db.close();
+    		return cities;
     	}
     	return null;
     }
@@ -339,7 +463,22 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
     
     public static int loadWidgetTextColor(Context context, int appWidgetId) {
     	SharedPreferences prefs = context.getSharedPreferences(appWidgetId + PREF_PREFIX_KEY, 0);
-    	return prefs.getInt(TEXT_COLOR, R.integer.COLOR_GREEN);
+    	return prefs.getInt(TEXT_COLOR, Color.LTGRAY);
+    }
+    
+    public static FontItem loadWidgetTextFont(Context context, int appWidgetId) {
+    	SharedPreferences prefs = context.getSharedPreferences(appWidgetId + PREF_PREFIX_KEY, 0);
+    	
+    	String fontFile =  prefs.getString(FONT, null);
+    	if(fontFile == null) {
+    		return null;
+    	}
+    	else {
+    		FontItem item = new FontItem();
+    		item.fileName = fontFile;
+    		item.displayValue = "Sample";
+    		return item;
+    	}
     }
     
 	private View.OnClickListener saveClickListener = new View.OnClickListener() {
@@ -362,7 +501,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 					{
 						cityTimeZones.add(city1TimeZone);
 						cityTimeZones.add(city2TimeZone);
-						saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked(), mValue, mTextColor);
+						saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked(), mValue, mTextColor, mFontItem);
 					}	
 				}
 				else
@@ -378,7 +517,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 				if(mAppWidgetId > 0)
 				{
 					cityTimeZones.add(cityTimeZone);
-					saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked(), mValue, mTextColor);
+					saveCtzsToSharedPRefs(context, mAppWidgetId, cityTimeZones, use24CheckBox.isChecked(), mValue, mTextColor, mFontItem);
 				}
 			}
 			else {
@@ -418,7 +557,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 			mTextColor = color;
 			setPreviewColor(TEXT_COLOR);
 		}
-		else {
+		else if( BACKGROUND_COLOR.equals(type)) {
 			mValue = color;
 			setPreviewColor(BACKGROUND_COLOR);	
 		}
@@ -437,6 +576,7 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 			previewTextColorView.setImageBitmap(getPreviewBitmap(mTextColor));
 		}
 	}
+	
 	
 	private Bitmap getPreviewBitmap(int color) {
 		int d = (int) (mDensity * 31); //30dip

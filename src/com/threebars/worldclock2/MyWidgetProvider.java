@@ -11,6 +11,8 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import com.threebars.worldclock2.WidgetSettingsActivity.FontItem;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -23,9 +25,13 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Align;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.RemoteViews;
 
 public class MyWidgetProvider extends AppWidgetProvider {
@@ -186,6 +192,8 @@ public class MyWidgetProvider extends AppWidgetProvider {
 		boolean use24Hours = WidgetSettingsActivity.loadUse24HoursFromSharedPRefs(context, appWidgetId);
 		int backgroundColor = WidgetSettingsActivity.loadWidgetBackgroundColor(context, appWidgetId);
 		int textColor = WidgetSettingsActivity.loadWidgetTextColor(context, appWidgetId);
+		FontItem fontItem = WidgetSettingsActivity.loadWidgetTextFont(context, appWidgetId);
+		String font = fontItem == null ? "roboto-bold.ttf" : fontItem.fileName;
         // Construct the RemoteViews object.  It takes the package name (in our case, it's our
         // package, but it needs this because on the other side it's the widget host inflating
         // the layout from our package).
@@ -204,18 +212,32 @@ public class MyWidgetProvider extends AppWidgetProvider {
 			fmt = DateTimeFormat.forPattern("EE"); // get day of the week
 			String day = fmt.print(dt);
 
-			/*android.graphics.Color.TRANSPARENT */
-//			views.setInt(R.id.c_widget_layout, "setBackgroundResource", android.graphics.Color.YELLOW); // this must be set first
-
-			views.setTextViewText(R.id.dateDate, day + " " + mediumDate);
-			views.setTextViewText(R.id.dateTime, df.print(dt));
-			views.setTextViewText(R.id.dateCity, ctz.city);
+			//The formula is pixels = dps * (density / 160), 
+			int width = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 130 /*2 cells */, context.getResources().getDisplayMetrics());
+			int height = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 26 /*1 cell */, context.getResources().getDisplayMetrics());
+			Log.d(TAG, " width : " + width + " height : " +height);
+			int fontSize = 100;
+			
+			int clockHeight= (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36 /*1 cell */, context.getResources().getDisplayMetrics());
+			
+			views.setImageViewBitmap(R.id.dateDate, buildUpdate(context, day + " " + mediumDate, textColor, width, height, 18, font, (height/2), Align.CENTER));
+//			views.setTextViewText(R.id.dateDate, day + " " + mediumDate);
+//			views.setTextViewText(R.id.dateTime, df.print(dt));
+//			views.setTextViewText(R.id.dateCity, ctz.city);
+			
+			
+			
+			views.setImageViewBitmap(R.id.dateTime, buildUpdate(context, df.print(dt), textColor, width, clockHeight, 44, font, (height/2)+15, Align.CENTER));
 			
 			if (backgroundColor != Color.BLACK) {
 				views.setInt(R.id.c_widget_layout, "setBackgroundColor", backgroundColor);
 			}
 			
-			views.setTextColor(R.id.dateTime, textColor);
+			views.setImageViewBitmap(R.id.dateCity, buildUpdate(context, ctz.city, textColor, width, height, 18,  font, height/2, Align.CENTER));
+			
+//			views.setTextColor(R.id.dateTime, textColor);
+//			views.setTextColor(R.id.dateCity, textColor);
+//			views.setTextColor(R.id.dateDate, textColor);
 
 		}
         ComponentName thisWidget = new ComponentName(context, MyWidgetProvider.class);
@@ -235,6 +257,24 @@ public class MyWidgetProvider extends AppWidgetProvider {
 		appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 	
+	public static Bitmap buildUpdate(Context context, String time, int color, int width, int height, int fontSize, String fontFile, int startY, android.graphics.Paint.Align align ) 
+	{
+		Log.d(TAG, " font name is : " + fontFile);
+	    Bitmap myBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+	    Canvas myCanvas = new Canvas(myBitmap);
+	    Paint paint = new Paint();
+	    Typeface clock = Typeface.createFromAsset(context.getAssets(),"fonts/" + fontFile);
+	    paint.setAntiAlias(true);
+	    paint.setSubpixelText(true);
+	    paint.setTypeface(clock);
+	    paint.setStyle(Paint.Style.FILL);
+	    paint.setColor(color);
+	    paint.setTextSize(fontSize);
+	    paint.setTextAlign(Align.CENTER);
+	    myCanvas.drawText(time, (width / 2), startY, paint);
+	    return myBitmap;
+	}
+	
 	
 	static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
             int appWidgetId, String titlePrefix, List<CityTimeZone> ctzs) {
@@ -243,7 +283,8 @@ public class MyWidgetProvider extends AppWidgetProvider {
 		boolean use24Hours = WidgetSettingsActivity.loadUse24HoursFromSharedPRefs(context, appWidgetId);
 		int backgroundColor = WidgetSettingsActivity.loadWidgetBackgroundColor(context, appWidgetId);
 		int textColor = WidgetSettingsActivity.loadWidgetTextColor(context, appWidgetId);
-		
+		FontItem fontItem = WidgetSettingsActivity.loadWidgetTextFont(context, appWidgetId);
+		String font = fontItem == null ? "roboto-bold.ttf" : fontItem.fileName;
         // Construct the RemoteViews object.  It takes the package name (in our case, it's our
         // package, but it needs this because on the other side it's the widget host inflating
         // the layout from our package).
@@ -277,14 +318,25 @@ public class MyWidgetProvider extends AppWidgetProvider {
 				/* android.graphics.Color.TRANSPARENT */
 				// views.setInt(R.id.c_widget_layout, "setBackgroundResource",
 				// android.graphics.Color.YELLOW); // this must be set first
+				
+				int width = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 160 /*2 cells */, context.getResources().getDisplayMetrics());
+				int height = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 36 /*1 cell */, context.getResources().getDisplayMetrics());
+				Log.d(TAG, " width : " + width + " height : " +height);
+				
+				
+				views.setImageViewBitmap(R.id.dateTime1, buildUpdate(context, df.print(dt), textColor, width, height, 24, font, (height/2), Align.LEFT));
+				views.setImageViewBitmap(R.id.dateCity1, buildUpdate(context, ctz.city, textColor, width, height, 24, font, (height/2), Align.RIGHT));
+				
 
-				views.setTextViewText(R.id.dateTime1, df.print(dt));
-				views.setTextViewText(R.id.dateCity1, ctz.city);
+//				views.setTextViewText(R.id.dateTime1, df.print(dt));
+//				views.setTextViewText(R.id.dateCity1, ctz.city);
 				if (backgroundColor != Color.BLACK) {
 					views.setInt(R.id.c_widget_layout2, "setBackgroundColor", backgroundColor);
 				}
-				views.setTextColor(R.id.dateTime1, textColor);
-				views.setTextColor(R.id.dateTime2, textColor);
+//				views.setTextColor(R.id.dateTime1, textColor);
+//				views.setTextColor(R.id.dateTime2, textColor);
+//				views.setTextColor(R.id.dateCity1, textColor);
+//				views.setTextColor(R.id.dateCity2, textColor);
 				// update second one (if exists)
 				if (ctzs.size() > 1) {
 					CityTimeZone ctz2 = ctzs.get(1);
@@ -298,8 +350,11 @@ public class MyWidgetProvider extends AppWidgetProvider {
 					// views.setInt(R.id.c_widget_layout, "setBackgroundResource",
 					// android.graphics.Color.YELLOW); // this must be set first
 
-					views.setTextViewText(R.id.dateTime2, df.print(dt2));
-					views.setTextViewText(R.id.dateCity2, ctz2.city);
+//					views.setTextViewText(R.id.dateTime2, df.print(dt2));
+//					views.setTextViewText(R.id.dateCity2, ctz2.city);
+					
+					views.setImageViewBitmap(R.id.dateTime2, buildUpdate(context, df.print(dt2), textColor, width, height, 24, font, (height/2), Align.LEFT));
+					views.setImageViewBitmap(R.id.dateCity2, buildUpdate(context, ctz2.city, textColor, width, height, 24, font, (height/2), Align.RIGHT));
 				}
 
 				 ComponentName thisWidget = new ComponentName(context, MyWidgetProvider.class);

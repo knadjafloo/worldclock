@@ -104,7 +104,7 @@ public class CitiesDatabase {
     public static final String KEY_COUNTRY = SearchManager.SUGGEST_COLUMN_TEXT_2;
 
 
-    private final DatabaseOpenHelper mDatabaseOpenHelper;
+    private DatabaseOpenHelper mDatabaseOpenHelper = null;
 
 	private Context context;
     private static final HashMap<String,String> mColumnMap = buildColumnMap();
@@ -124,6 +124,7 @@ public class CitiesDatabase {
     		mDatabaseOpenHelper.close();
     	}
     }
+    
     
    
     /**
@@ -171,9 +172,12 @@ public class CitiesDatabase {
         if(cursor.getCount() > 0) {
         	CityTimeZone ctz = cursorToCityTimeZone(cursor);
         	cursor.close();
+        	mDatabaseOpenHelper.close();
         	return ctz;
         }
+        db.close();
         cursor.close();
+        mDatabaseOpenHelper.close();
         return null;
     }
     
@@ -191,7 +195,9 @@ public class CitiesDatabase {
 			cursor.moveToNext();
 		}
 		// Make sure to close the cursor
+		db.close();
 		cursor.close();
+		mDatabaseOpenHelper.close();
 		return cities;
     }
     
@@ -215,8 +221,9 @@ public class CitiesDatabase {
 			cursor.moveToNext();
 		}
 		// Make sure to close the cursor
+		db.close();
 		cursor.close();
-		
+		mDatabaseOpenHelper.close();
 		final Map<String, Integer> orderMap = new HashMap<String, Integer>();
 		
 		Log.d("DAO", "# of cities : " + cities.size());
@@ -242,8 +249,9 @@ public class CitiesDatabase {
 			cursor.moveToNext();
 		}
 		// Make sure to close the cursor
+		db.close();
 		cursor.close();
-		
+		mDatabaseOpenHelper.close();
 		String[] idsArr = ids.split(",");
 		final Map<String, Integer> orderMap = new HashMap<String, Integer>();
 		int count = 0;
@@ -323,15 +331,19 @@ public class CitiesDatabase {
         builder.setTables(TABLE_CITIES_FTS);
         builder.setProjectionMap(mColumnMap);
 
-        Cursor cursor = builder.query(mDatabaseOpenHelper.getReadableDatabase(),
+        SQLiteDatabase db = mDatabaseOpenHelper.getReadableDatabase();
+        Cursor cursor = builder.query(db,
                 columns, selection, selectionArgs, null, null, null);
 
         if (cursor == null) {
             return null;
         } else if (!cursor.moveToFirst()) {
             cursor.close();
+            mDatabaseOpenHelper.close();
             return null;
         }
+        db.close();
+        mDatabaseOpenHelper.close();
         return cursor;
     }
     
@@ -343,7 +355,7 @@ public class CitiesDatabase {
 
         private final Context mHelperContext;
         private SQLiteDatabase mDatabase;
-		private SQLiteDatabase myDatabase;
+//		private SQLiteDatabase myDatabase;
 
         /* Note that FTS3 does not support column constraints and thus, you cannot
          * declare a primary key. However, "rowid" is automatically used as a unique
@@ -443,13 +455,6 @@ public class CitiesDatabase {
     			throw new Error("Problem copying the database from resource file");
     		}
     		
-    	}
-    	
-    	@Override
-    	public synchronized void close() {
-    		if (myDatabase != null)
-    			myDatabase.close();
-    		super.close();
     	}
 
  

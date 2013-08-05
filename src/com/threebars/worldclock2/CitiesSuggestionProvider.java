@@ -64,6 +64,7 @@ public class CitiesSuggestionProvider extends ContentProvider {
 	        mDictionary = new CitiesDatabase(getContext());
 	        return true;
 	    }
+	    
 
 	    /**
 	     * Handles all the dictionary searches and suggestion queries from the Search Manager.
