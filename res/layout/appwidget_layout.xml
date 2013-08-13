@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/c_widget_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
     android:weightSum="1"
     
     
@@ -12,20 +12,19 @@
     <ImageView
         android:id="@+id/dateDate"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:scaleType="fitCenter"
+        android:scaleType="centerCrop"
         android:layout_weight=".12"
          >
     </ImageView>
     <ImageView
         android:id="@+id/dateTime"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:layout_weight=".76"
         android:layout_gravity="center"
-        android:scaleType="fitCenter"
+        android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         android:text="@string/loading" >
     </ImageView>
@@ -33,9 +32,9 @@
     <ImageView
         android:id="@+id/dateCity"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:scaleType="fitCenter"
+        android:scaleType="centerCrop"
         android:layout_weight=".12"
         android:text="" >
 
