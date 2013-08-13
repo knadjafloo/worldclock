@@ -301,7 +301,8 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 	
 	private void setFontItem(FontItem mFontItem) {
 		fontView.setText(mFontItem.displayValue);
-		Typeface face=Typeface.createFromAsset(getAssets(), "fonts/" + mFontItem.fileName); 
+//		Typeface face=Typeface.createFromAsset(getAssets(), "fonts/" + mFontItem.fileName);
+		Typeface face = Typefaces.get(this, "fonts/" + mFontItem.fileName);
 		fontView.setTypeface(face);
 	}
 	
@@ -334,7 +335,8 @@ public class WidgetSettingsActivity extends Activity implements ColorPickerDialo
 		    FontItem font = values.get(position);
 		    textView.setText(font.displayValue);
 		    
-		    Typeface face=Typeface.createFromAsset(getAssets(), "fonts/" + font.fileName); 
+//		    Typeface face=Typeface.createFromAsset(getAssets(), "fonts/" + font.fileName);
+		    Typeface face = Typefaces.get(context, "fonts/" + font.fileName);
 		    textView.setTypeface(face); 
 		    return rowView;
 		  }

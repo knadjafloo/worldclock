@@ -171,14 +171,15 @@
         android:orientation="horizontal" >
 
        <TextView
-        style="@android:style/TextAppearance.Small"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight=".5"
-        android:gravity="left"
-        android:layout_margin="4dip"
-        android:textSize="17sp"
-        android:text="Font" />
+           style="@android:style/TextAppearance.Small"
+           android:layout_width="fill_parent"
+           android:layout_height="match_parent"
+           android:layout_margin="4dip"
+           android:layout_weight=".5"
+           android:gravity="left"
+           android:text="Font"
+           android:textSize="17sp" />
+
         <TextView
         android:id="@+id/fontType"
         android:layout_width="fill_parent"

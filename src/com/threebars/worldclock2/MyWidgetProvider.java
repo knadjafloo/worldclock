@@ -263,7 +263,8 @@ public class MyWidgetProvider extends AppWidgetProvider {
 	    Bitmap myBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 	    Canvas myCanvas = new Canvas(myBitmap);
 	    Paint paint = new Paint();
-	    Typeface clock = Typeface.createFromAsset(context.getAssets(),"fonts/" + fontFile);
+//	    Typeface clock = Typeface.createFromAsset(context.getAssets(),"fonts/" + fontFile);
+	    Typeface clock = Typefaces.get(context, "fonts/" + fontFile);
 	    paint.setAntiAlias(true);
 	    paint.setSubpixelText(true);
 	    paint.setTypeface(clock);
